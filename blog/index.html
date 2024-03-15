@@ -58,46 +58,61 @@
             <div class="progress-container"> <span class="progress-bar"></span> </div>
         </progress>
     </header>
-    <div class="container mt-5">
-        <div class="post">
-            <div class="header-bar">
-                <h1>Trang Thoi's Blog</h1>
-                <h2>Stories about my journeys, my experience in scientific research, and in developing my career.</h2>
-            </div>
-            <div class="tag-list">
-                <ul class="p-0 m-0">
-                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/life">life</a></li>
-                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/math">math</a></li>
-                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/code">code</a></li>
-                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/OR">OR</a></li>
-                </ul>
-            </div>
-            <ul class="post-list">
-                <li>
-                    <div class="post-header">
-                        <p><img class="post-image" src="https://i.imgur.com/12W9SUa.jpeg" alt="Post Image"></p>
-                        <div class="post-details">
-                            <h3><a class="post-title" href="/blog/2024/travel-diary/">With warm eyes</a></h3>
-                            <p>piece of soul</p>
-                            <p class="post-meta">30 min read &nbsp; · &nbsp; Jan 29, 2024</p>
-                            <p class="post-tags"><a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;· &nbsp;&nbsp;<a href="/blog/tag/life"><i class="fas fa-hashtag fa-sm"></i> life</a> &nbsp; &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-writing"><i class="fas fa-tag fa-sm"></i> free-writing</a> &nbsp;</p>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="post-header">
-                        <p><img class="post-image" src="https://i.imgur.com/S0IPPxp.jpeg" alt="Post Image"></p>
-                        <div class="post-details">
-                            <h3><a class="post-title" href="/blog/2024/beautiful-math/">Beautiful math</a></h3>
-                            <p>Beautiful math</p>
-                            <p class="post-meta">35 min read &nbsp; · &nbsp; Mar 15, 2024</p>
-                            <p class="post-tags"><a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;· &nbsp;&nbsp;<a href="/blog/tag/math"><i class="fas fa-hashtag fa-sm"></i> math</a> &nbsp; &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-research"><i class="fas fa-tag fa-sm"></i> free-research</a> &nbsp;</p>
-                        </div>
-                    </div>
-                </li>
+<style>
+    .post-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px; /* Adjust margin as needed */
+    }
+
+    .post-image {
+        width: 100px; /* Adjust width as needed */
+        height: auto;
+        margin-right: 20px; /* Adjust margin as needed */
+    }
+
+    .post-details {
+        flex: 1; /* Allows the text to take remaining space */
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="post">
+        <div class="header-bar">
+            <h1>Trang Thoi's Blog</h1>
+            <h2>Stories about my journeys, my experience in scientific research, and in developing my career.</h2>
+        </div>
+        <div class="tag-list">
+            <ul class="p-0 m-0">
+                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/life">life</a></li>
+                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/math">math</a></li>
+                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/code">code</a></li>
+                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/OR">OR</a></li>
             </ul>
         </div>
+        <div class="post-list">
+            <div class="post-container">
+                <img src="https://i.imgur.com/12W9SUa.jpeg" alt="Post Image" class="post-image">
+                <div class="post-details">
+                    <h3><a class="post-title" href="/blog/2024/travel-diary/">With warm eyes</a></h3>
+                    <p>piece of soul</p>
+                    <p class="post-meta">30 min read &nbsp; · &nbsp; Jan 29, 2024</p>
+                    <p class="post-tags"><a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;· &nbsp;&nbsp;<a href="/blog/tag/life"><i class="fas fa-hashtag fa-sm"></i> life</a> &nbsp; &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-writing"><i class="fas fa-tag fa-sm"></i> free-writing</a> &nbsp;</p>
+                </div>
+            </div>
+            <div class="post-container">
+                <img src="https://i.imgur.com/S0IPPxp.jpeg" alt="Post Image" class="post-image">
+                <div class="post-details">
+                    <h3><a class="post-title" href="/blog/2024/beautiful-math/">Beautiful math</a></h3>
+                    <p>Beautiful math</p>
+                    <p class="post-meta">35 min read &nbsp; · &nbsp; Mar 15, 2024</p>
+                    <p class="post-tags"><a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;· &nbsp;&nbsp;<a href="/blog/tag/math"><i class="fas fa-hashtag fa-sm"></i> math</a> &nbsp; &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-research"><i class="fas fa-tag fa-sm"></i> free-research</a> &nbsp;</p>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
     <footer class="fixed-bottom">
         <div class="container mt-0"> &copy; Copyright 2024 Trang Thoi. Powered by <a href="https://jekyllrb.com/"
                 target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
