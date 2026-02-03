@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CTICU Extubation Decision Survey — Navigation</title>
+  <style>
+    :root { --border:#e5e7eb; --text:#111827; --muted:#6b7280; --bg:#ffffff; --soft:#f9fafb; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 24px;
+      max-width: 860px;
+      color: var(--text);
+      background: var(--bg);
+    }
+    h1 { margin: 0 0 6px; }
+    .note { color: var(--muted); line-height: 1.45; margin: 0 0 18px; }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fff;
+      margin: 14px 0;
+    }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 720px){
+      .grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    a.survey {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--soft);
+      transition: transform .05s ease-in-out;
+    }
+    a.survey:hover { transform: translateY(-1px); }
+    .title { font-weight: 800; margin: 0 0 6px; }
+    .desc { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.35; }
+    .footer { margin-top: 18px; font-size: 0.9rem; color: var(--muted); }
+    .btnRow { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+    .btn {
+      display:inline-block;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #111;
+      background:#111;
+      color:#fff;
+      text-decoration:none;
+      font-weight: 700;
+    }
+    .btn2 {
+      display:inline-block;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #9ca3af;
+      background:#fff;
+      color:#111;
+      text-decoration:none;
+      font-weight: 700;
+    }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 8px; border:1px solid var(--border); }
+  </style>
+</head>
+
+<body>
+  <h1>CTICU Extubation Decision Survey</h1>
+  <p class="note">
+    Use the links below to open the correct survey group.
+  </p>
+
+  <div class="card">
+    <div class="grid">
+      <a class="survey" href="./survey01_group0.html">
+        <p class="title">Group 0</p>
+        <p class="desc">Binary AI support only (no probability display).</p>
+      </a>
+
+      <a class="survey" href="./survey01_group1.html">
+        <p class="title">Group 1</p>
+        <p class="desc">AI probability shown (no threshold displayed).</p>
+      </a>
+
+      <a class="survey" href="./survey01_group2.html">
+        <p class="title">Group 2</p>
+        <p class="desc">AI probability shown + threshold displayed.</p>
+      </a>
+    </div>
+
+    <div class="btnRow">
+      <a class="btn2" href="./survey01_group0.html">Open Group 0</a>
+      <a class="btn2" href="./survey01_group1.html">Open Group 1</a>
+      <a class="btn2" href="./survey01_group2.html">Open Group 2</a>
+    </div>
+
+    <p class="footer">
+      If you have any questions or problems, please contact
+      <a href="mailto:tdktrang@vt.edu">tdktrang@vt.edu</a>.
+    </p>
+  </div>
+
+  <p class="footer">
+    Tip: If this folder is published via GitHub Pages, visiting <code>/research_survey/</code>
+    will automatically load <code>index.html</code>.
+  </p>
+</body>
+</html>
