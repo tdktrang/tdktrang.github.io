@@ -2,18 +2,19 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title> blog | Trang Thoi</title>
     <meta name="author" content="Trang Thoi" />
     <meta name="description"
         content="A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design. " />
     <meta name="keywords" content="trang thoi, trang" />
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css"
-        integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous" />
+        integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYAI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css"
         integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css"
@@ -22,7 +23,7 @@
         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media=""
         id="highlight_theme_light" />
-        <link rel="shortcut icon"
+    <link rel="shortcut icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>">
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="canonical" href="https://tdktrang.github.io/blog/">
@@ -30,18 +31,67 @@
         media="none" id="highlight_theme_dark" />
     <script src="/assets/js/theme.js"></script>
     <script src="/assets/js/dark_mode.js"></script>
+
+    <style>
+        .post-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .post-image {
+            width: 150px;
+            height: 150px;
+            margin-right: 20px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .post-details {
+            flex: 1;
+        }
+
+        .locked-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(0, 0, 0, 0.03);
+            margin-left: 8px;
+        }
+
+        .locked-pill i {
+            font-size: 12px;
+        }
+
+        .hint {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .pw-error {
+            display: none;
+        }
+    </style>
 </head>
 
 <body class="fixed-top-nav ">
     <header>
         <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
-            <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"><span
-                        class="font-weight-bold">Trang&nbsp;</span>Thoi</a> <button
-                    class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse"
+            <div class="container">
+                <a class="navbar-brand title font-weight-lighter" href="/"><span
+                        class="font-weight-bold">Trang&nbsp;</span>Thoi</a>
+                <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse"
                     data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-                    aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span
-                        class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span
-                        class="icon-bar bottom-bar"></span> </button>
+                    aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar top-bar"></span>
+                    <span class="icon-bar middle-bar"></span>
+                    <span class="icon-bar bottom-bar"></span>
+                </button>
                 <div class="collapse navbar-collapse text-right" id="navbarNav">
                     <ul class="navbar-nav ml-auto flex-nowrap">
                         <li class="nav-item "> <a class="nav-link" href="/">about</a> </li>
@@ -54,79 +104,214 @@
                     </ul>
                 </div>
             </div>
-        </nav> <progress id="progress" value="0">
+        </nav>
+        <progress id="progress" value="0">
             <div class="progress-container"> <span class="progress-bar"></span> </div>
         </progress>
     </header>
-<style>
-    .post-container {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px; 
-    }
 
-    .post-image {
-        width: 150px; 
-        height: 150px;
-        margin-right: 20px; 
-    }
-
-    .post-details {
-        flex: 1; 
-    }
-</style>
-
-<div class="container mt-5">
-    <div class="post">
-        <div class="header-bar">
-            <h1>Trang Thoi's Blog</h1>
-            <h2>Stories about my journeys, my experience in scientific research, and in developing my career.</h2>
-        </div>
-        <div class="tag-list">
-            <ul class="p-0 m-0">
-                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/life">life</a></li>
-                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/math">math</a></li>
-                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/code">code</a></li>
-                <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/OR">OR</a></li>
-            </ul>
-        </div>
-        <div class="post-list">
-            <div class="post-container">
-                <img src="https://i.imgur.com/3OPUCD4.png" alt="Post Image" class="post-image">
-                <div class="post-details">
-                    <h3><a class="post-title" href="/blog/2024/book-review/">With warm eyes</a></h3>
-                    <p>piece of soul</p>
-                    <p class="post-meta">30 min read &nbsp; · &nbsp; Jan 29, 2024</p>
-                    <p class="post-tags"><a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;· &nbsp;&nbsp;<a href="/blog/tag/life"><i class="fas fa-hashtag fa-sm"></i> life</a> &nbsp; &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-writing"><i class="fas fa-tag fa-sm"></i> free-writing</a> &nbsp;</p>
-                </div>
+    <div class="container mt-5">
+        <div class="post">
+            <div class="header-bar">
+                <h1>Trang Thoi's Blog</h1>
+                <h2>Stories about my journeys, my experience in scientific research, and in developing my career.</h2>
             </div>
-            <div class="post-container">
-                <img src="https://i.imgur.com/S0IPPxp.jpeg" alt="Post Image" class="post-image">
-                <div class="post-details">
-                    <h3><a class="post-title" href="/blog/2024/beautiful-math/">Beautiful math</a></h3>
-                    <p>Beautiful math</p>
-                    <p class="post-meta">35 min read &nbsp; · &nbsp; Mar 15, 2024</p>
-                    <p class="post-tags"><a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;· &nbsp;&nbsp;<a href="/blog/tag/math"><i class="fas fa-hashtag fa-sm"></i> math</a> &nbsp; &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-research"><i class="fas fa-tag fa-sm"></i> free-research</a> &nbsp;</p>
+
+            <div class="tag-list">
+                <ul class="p-0 m-0">
+                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/life">life</a></li>
+                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/math">math</a></li>
+                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/code">code</a></li>
+                    <li><i class="fas fa-hashtag fa-sm"></i> <a href="/blog/tag/OR">OR</a></li>
+                </ul>
+            </div>
+
+            <div class="post-list">
+
+                <!-- PROTECTED POST 1 -->
+                <div class="post-container">
+                    <img src="https://i.imgur.com/3OPUCD4.png" alt="Post Image" class="post-image">
+                    <div class="post-details">
+                        <h3>
+                            <a class="post-title protected-link"
+                               href="/blog/2024/book-review/"
+                               data-protected="true"
+                               data-title="With warm eyes"
+                               data-hash="68a551cfb09aeedb4e9fa78e3247542c07071967922b8fd2dc17edffa4c684c7">
+                                With warm eyes
+                            </a>
+                            <span class="locked-pill" title="Password protected">
+                                <i class="fas fa-lock"></i> protected
+                            </span>
+                        </h3>
+                        <p>piece of soul</p>
+                        <p class="post-meta">30 min read &nbsp; · &nbsp; Jan 29, 2024</p>
+                        <p class="post-tags">
+                            <a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;·
+                            &nbsp;&nbsp;<a href="/blog/tag/life"><i class="fas fa-hashtag fa-sm"></i> life</a> &nbsp;
+                            &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-writing"><i
+                                    class="fas fa-tag fa-sm"></i> free-writing</a> &nbsp;
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PROTECTED POST 2 -->
+                <div class="post-container">
+                    <img src="https://i.imgur.com/S0IPPxp.jpeg" alt="Post Image" class="post-image">
+                    <div class="post-details">
+                        <h3>
+                            <a class="post-title protected-link"
+                               href="/blog/2024/beautiful-math/"
+                               data-protected="true"
+                               data-title="Beautiful math"
+                               data-hash="990055517118c4e46d5e75ea3b420e5ad7f21d119c6b82f4afc1d6f8a3ba5a94">
+                                Beautiful math
+                            </a>
+                            <span class="locked-pill" title="Password protected">
+                                <i class="fas fa-lock"></i> protected
+                            </span>
+                        </h3>
+                        <p>Beautiful math</p>
+                        <p class="post-meta">35 min read &nbsp; · &nbsp; Mar 15, 2024</p>
+                        <p class="post-tags">
+                            <a href="/blog/2024"><i class="fas fa-calendar fa-sm"></i> 2024&nbsp;</a> &nbsp;·
+                            &nbsp;&nbsp;<a href="/blog/tag/math"><i class="fas fa-hashtag fa-sm"></i> math</a> &nbsp;
+                            &nbsp; · &nbsp;&nbsp;<a href="/blog/category/free-research"><i
+                                    class="fas fa-tag fa-sm"></i> free-research</a> &nbsp;
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSWORD MODAL -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passwordModalLabel">
+                        <i class="fas fa-lock mr-2"></i> This post is protected
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2 hint">
+                        Enter password to open: <span id="protectedPostTitle" style="font-weight:600;"></span>
+                    </div>
+
+                    <div class="form-group mb-2">
+                        <input id="postPassword" type="password" class="form-control" placeholder="Password..." />
+                    </div>
+
+                    <div class="alert alert-danger pw-error" id="pwError" role="alert">
+                        Wrong password. Try again.
+                    </div>
+
+                    <div class="hint mt-2">
+                        Tip: passwords are case-sensitive.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark" id="unlockBtn">
+                        Unlock
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <footer class="fixed-bottom">
-        <div class="container mt-0"> &copy; Copyright 2024 Trang Thoi. Powered by <a href="https://jekyllrb.com/"
-                target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
-            Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>. Photos from <a
-                href="https://unsplash.com" target="_blank">Unsplash</a>. </div>
+        <div class="container mt-0"> &copy; Copyright 2024 Trang Thoi.
+            Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with
+            <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
+            Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
+            Photos from <a href="https://unsplash.com" target="_blank">Unsplash</a>.
+        </div>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js"
-        integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"
-        integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+
+    <script>
+        // ===== Password gate for protected links (client-side) =====
+
+        // Keep unlock state per-post (so user doesn't retype every time in same browser)
+        // Key: "unlock:<href>"
+        function storageKey(href) { return "unlock:" + href; }
+
+        async function sha256Hex(str) {
+            const data = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        let pendingHref = null;
+        let pendingHash = null;
+
+        function openModal(title) {
+            $("#protectedPostTitle").text(title || "this post");
+            $("#postPassword").val("");
+            $("#pwError").hide();
+            $("#passwordModal").modal("show");
+            setTimeout(() => $("#postPassword").trigger("focus"), 250);
+        }
+
+        // Intercept clicks
+        document.addEventListener("click", function (e) {
+            const a = e.target.closest("a.protected-link");
+            if (!a) return;
+
+            const href = a.getAttribute("href");
+            const expectedHash = a.getAttribute("data-hash");
+            const title = a.getAttribute("data-title") || a.textContent.trim();
+
+            // If already unlocked in this browser, allow navigation
+            if (localStorage.getItem(storageKey(href)) === "1") return;
+
+            // Otherwise block and ask password
+            e.preventDefault();
+            pendingHref = href;
+            pendingHash = expectedHash;
+            openModal(title);
+        });
+
+        // Unlock button
+        document.getElementById("unlockBtn").addEventListener("click", async function () {
+            const input = document.getElementById("postPassword").value || "";
+            const digest = await sha256Hex(input);
+
+            if (digest === pendingHash) {
+                localStorage.setItem(storageKey(pendingHref), "1");
+                $("#passwordModal").modal("hide");
+                window.location.href = pendingHref;
+            } else {
+                $("#pwError").show();
+            }
+        });
+
+        // Enter-to-unlock
+        document.getElementById("postPassword").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") document.getElementById("unlockBtn").click();
+        });
+
+        // Clear pending when modal closes
+        $('#passwordModal').on('hidden.bs.modal', function () {
+            pendingHref = null;
+            pendingHash = null;
+            $("#pwError").hide();
+        });
+    </script>
+
+    <!-- Your existing scripts -->
     <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
     <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js"
@@ -135,12 +320,40 @@
     <script defer src="/assets/js/common.js"></script>
     <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
     <script async src="https://badge.dimensions.ai/badge.js"></script>
+
     <script type="text/javascript">window.MathJax = { tex: { tags: "ams" } };</script>
     <script defer type="text/javascript" id="MathJax-script"
         src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
     <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
     <script
-        type="text/javascript">function progressBarSetup() { "max" in document.createElement("progress") ? (initializeProgressElement(), $(document).on("scroll", function () { progressBar.attr({ value: getCurrentScrollPosition() }) }), $(window).on("resize", initializeProgressElement)) : (resizeProgressBar(), $(document).on("scroll", resizeProgressBar), $(window).on("resize", resizeProgressBar)) } function getCurrentScrollPosition() { return $(window).scrollTop() } function initializeProgressElement() { let e = $("#navbar").outerHeight(!0); $("body").css({ "padding-top": e }), $("progress-container").css({ "padding-top": e }), progressBar.css({ top: e }), progressBar.attr({ max: getDistanceToScroll(), value: getCurrentScrollPosition() }) } function getDistanceToScroll() { return $(document).height() - $(window).height() } function resizeProgressBar() { progressBar.css({ width: getWidthPercentage() + "%" }) } function getWidthPercentage() { return getCurrentScrollPosition() / getDistanceToScroll() * 100 } const progressBar = $("#progress"); window.onload = function () { setTimeout(progressBarSetup, 50) };</script>
+        type="text/javascript">
+        function progressBarSetup() {
+            "max" in document.createElement("progress") ? (
+                initializeProgressElement(),
+                $(document).on("scroll", function () { progressBar.attr({ value: getCurrentScrollPosition() }) }),
+                $(window).on("resize", initializeProgressElement)
+            ) : (
+                resizeProgressBar(),
+                $(document).on("scroll", resizeProgressBar),
+                $(window).on("resize", resizeProgressBar)
+            )
+        }
+        function getCurrentScrollPosition() { return $(window).scrollTop() }
+        function initializeProgressElement() {
+            let e = $("#navbar").outerHeight(!0);
+            $("body").css({ "padding-top": e }),
+                $("progress-container").css({ "padding-top": e }),
+                progressBar.css({ top: e }),
+                progressBar.attr({ max: getDistanceToScroll(), value: getCurrentScrollPosition() })
+        }
+        function getDistanceToScroll() { return $(document).height() - $(window).height() }
+        function resizeProgressBar() { progressBar.css({ width: getWidthPercentage() + "%" }) }
+        function getWidthPercentage() { return getCurrentScrollPosition() / getDistanceToScroll() * 100 }
+        const progressBar = $("#progress");
+        window.onload = function () { setTimeout(progressBarSetup, 50) };
+    </script>
 </body>
 
 </html>
