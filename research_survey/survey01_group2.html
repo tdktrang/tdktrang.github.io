@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CTICU Extubation Decision Survey — Group 2</title>
+  <style>
+    :root { --border:#e5e7eb; --text:#111827; --muted:#6b7280; --bg:#ffffff; --soft:#f9fafb; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; max-width: 980px; color:var(--text); background:var(--bg); }
+    h1 { margin: 0 0 6px; }
+    .note { color: var(--muted); font-size: 0.95rem; line-height: 1.35; }
+    .card { border:1px solid var(--border); border-radius: 14px; padding: 18px; margin: 14px 0; background: #fff; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display:block; font-weight:650; margin-top: 10px; }
+    input, textarea { width:100%; padding: 10px; margin-top: 6px; border-radius: 12px; border:1px solid #d1d5db; font-size: 14px; }
+    textarea { min-height: 90px; }
+    .hidden { display:none; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background: var(--soft); border:1px solid var(--border); margin-right: 8px; font-size: 13px; }
+    .pill.active { background:#e8f3ff; border-color:#3b82f6; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1px solid #111; background:#111; color:#fff; cursor:pointer; font-weight: 650; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .btn2 { padding: 10px 14px; border-radius: 12px; border: 1px solid #9ca3af; background:#fff; color:#111; cursor:pointer; font-weight: 650; }
+    .success { color:#0a7a2f; font-weight: 800; }
+    .warn { color:#8a2a00; font-weight: 800; }
+    .casebox { border:1px solid var(--border); background: var(--soft); border-radius: 14px; padding: 14px; margin-top: 10px; }
+    .kv { margin: 6px 0; }
+    .kv b { font-weight: 800; }
+    .divider { height:1px; background: var(--border); margin: 12px 0; }
+    .small { font-size: 12.5px; color: var(--muted); }
+    a { color:#0b63ce; }
+    a:visited { color:#0b63ce; }
+
+    /* ===== Bar + overlays (AI display only) ===== */
+    .barWrap { margin-top: 8px; }
+    .barTopRow { display:flex; align-items:flex-start; justify-content:space-between; gap: 10px; }
+    .pillBox {
+      display:inline-block; padding: 6px 10px; border-radius: 999px;
+      background:#fff; border:1px solid var(--border);
+      font-size: 13px; font-weight: 800; white-space: nowrap;
+    }
+
+    .barContainer { position: relative; margin-top: 10px; height: 34px; }
+    .track {
+      position:absolute; left:0; right:0; top: 14px;
+      height: 6px; border-radius: 999px; background: #d1d5db;
+    }
+
+    .marker {
+      position: absolute;
+      top: 11px;
+      width: 2px;
+      height: 14px;
+      background: #111827;
+      z-index: 3;
+      transform: translateX(-1px);
+      border-radius: 2px;
+      opacity: 0.95;
+    }
+    .markerLabel {
+      position: absolute;
+      top: -2px;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      z-index: 3;
+      background: rgba(255,255,255,0.85);
+      padding: 0 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .marker.ai { background: #2563eb; }
+    .marker.thr { background: #ef4444; }
+
+    .barLabels { display:flex; justify-content:space-between; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+    /* Yes/No choice */
+    .ynRow { display:flex; gap: 16px; align-items:center; margin-top: 8px; flex-wrap: wrap; }
+    .ynChoice { display:flex; gap: 8px; align-items:center; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; background:#fff; cursor:pointer; }
+    .ynChoice input { width:auto; margin:0; padding:0; }
+    .questionBox { padding: 12px; border:1px solid var(--border); border-radius: 14px; background:#fff; margin-top: 12px; }
+  </style>
+</head>
+
+<body>
+  <h1>CTICU Extubation Decision Survey — Group 2</h1>
+  <p class="note">
+    Thank you for participating in this study.  
+    This survey is designed to better understand <b>clinical decision-making around extubation in the ICU</b> and how different forms of decision support may influence judgments about patient outcomes.
+    <br/><br/>
+    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would experience a failure outcome (e.g., reintubation or need for non-invasive ventilation within 48 hours).
+    <br/><br/>
+    The survey typically takes approximately <b>30 minutes</b> to complete.  
+    Please respond based on your clinical judgment.
+    <br/><br/>
+    Thank you for your time and contribution to this research.
+  </p>
+
+  <!-- ===================== SETUP ===================== -->
+  <div class="card" id="setupCard">
+    <h2 style="margin:0 0 6px;">Participant Info</h2>
+    <p class="note" style="margin:0 0 8px;">
+      Please enter a study ID (no personal identifiers). You can’t start until Doctor ID is filled.
+    </p>
+
+    <div class="row">
+      <div>
+        <label for="doctor_id">Doctor ID (or initials)</label>
+        <input id="doctor_id" placeholder="e.g., D023" required />
+      </div>
+      <div>
+        <label for="specialty">Specialty (optional)</label>
+        <input id="specialty" placeholder="Pulm/Critical Care" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="years_exp">Years of experience (optional)</label>
+        <input id="years_exp" type="number" min="0" max="60" placeholder="e.g., 7" />
+      </div>
+      <div>
+        <label for="group_id">Group / Arm (optional)</label>
+        <!-- <input id="group_id" placeholder="e.g., A / B / C" /> -->
+         <input id="group_id" value="Group 2" readonly />
+
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ADMIN-ONLY SETTINGS (hidden unless ?admin=1) -->
+    <div id="adminSettings" class="hidden">
+      <h3 style="margin:0 0 6px;">Admin Settings</h3>
+      <div class="row">
+        <div>
+          <label for="thr_input">Threshold (Phase 2 & 3)</label>
+          <input id="thr_input" type="number" step="0.001" min="0" max="1" placeholder="e.g., 0.500" />
+          <div class="small">If empty, will use URL param <code>?thr=</code> or default <b>0.500</b>.</div>
+        </div>
+        <div>
+          <label for="training_url">Training Document URL (Phase 2)</label>
+          <input id="training_url" placeholder="Paste link (PDF/Doc), or leave blank" />
+          <div class="small">If empty, will use URL param <code>?train=</code> or default training URL.</div>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:8px;">
+        Tip: <code>?thr=0.5&amp;train=https://...&amp;admin=1</code>
+      </div>
+    </div>
+
+    <div style="margin-top: 14px; display:flex; gap:10px; align-items:center;">
+      <button class="btn" id="startBtn" type="button">Start Survey</button>
+      <span class="note" id="setupMsg"></span>
+    </div>
+  </div>
+
+  <!-- ===================== PROGRESS ===================== -->
+  <div class="card hidden" id="progressCard">
+    <h2 style="margin:0 0 6px;">Progress</h2>
+    <div style="margin-top:6px;">
+      <span class="pill" id="p0pill">Phase 0</span>
+      <span class="pill" id="p1pill">Phase 1</span>
+      <span class="pill" id="p2pill">Phase 2</span>
+      <span class="pill" id="p3pill">Phase 3</span>
+      <span class="pill" id="casePill">Case —</span>
+    </div>
+    <p id="status" class="note" style="margin:10px 0 0;">—</p>
+  </div>
+
+  <!-- ===================== MAIN CASE UI ===================== -->
+  <div class="card hidden" id="caseCard">
+    <h2 style="margin:0 0 6px;" id="phaseTitle">—</h2>
+
+    <div id="phaseIntro" class="note" style="margin:0 0 8px;"></div>
+
+    <div class="casebox">
+      <div class="kv"><b id="caseHeader">Case —</b></div>
+      <div id="caseText" class="note"></div>
+
+      <div class="divider"></div>
+
+      <div class="kv" id="aiBinaryRow">AI Support (binary): <b id="aiSupportBinary">—</b></div>
+
+      <div id="aiPanel" class="hidden" style="margin-top:8px;">
+        <div class="kv">AI Risk (failure probability): <b id="aiRiskLabel">—</b></div>
+      </div>
+    </div>
+
+    <form id="answerForm">
+      <div class="questionBox">
+        <div style="font-weight:800;">
+          If extubate now, will the patient have the failure outcome such as (reintubation, NIV,… within 48 hours):
+        </div>
+
+        <div class="ynRow" role="radiogroup" aria-label="Failure prediction yes/no">
+          <label class="ynChoice">
+            <input type="radio" name="human_failure_prediction" value="yes" />
+            <b>Yes</b> (failure outcome will occur)
+          </label>
+          <label class="ynChoice">
+            <input type="radio" name="human_failure_prediction" value="no" />
+            <b>No</b> (failure outcome will not occur)
+          </label>
+        </div>
+        <div class="small" style="margin-top:8px;">
+          Your response is <b>Yes/No only</b>.
+        </div>
+      </div>
+
+      <!-- AI display bar (HIDDEN in Phase 0) -->
+      <div id="aiBarWrap" class="barWrap">
+        <div class="barTopRow">
+          <div class="note" style="margin:0;">
+            <b>0</b> = low failure risk &nbsp;•&nbsp;
+            <b>100</b> = high failure risk
+          </div>
+          <span class="pillBox" id="aiReadout">AI: —</span>
+        </div>
+
+        <div class="barContainer" id="barContainer">
+          <div class="track"></div>
+
+          <div id="aiMarker" class="marker ai hidden"></div>
+          <div id="aiMarkerLabel" class="markerLabel hidden"></div>
+
+          <div id="thrMarker" class="marker thr hidden"></div>
+          <div id="thrMarkerLabel" class="markerLabel hidden"></div>
+        </div>
+
+        <div class="barLabels">
+          <span>0 = low risk</span>
+          <span>50 = borderline</span>
+          <span>100 = high risk</span>
+        </div>
+
+        <div class="small" style="margin-top:8px;">
+          Phase 2/3: Blue marker shows AI failure-risk (%) on this same scale. Red marker shows threshold (e.g., 0.5 = 50%).
+        </div>
+      </div>
+
+      <label>Rationale (optional)</label>
+      <textarea name="rationale" id="rationale" placeholder="Brief reasoning…"></textarea>
+
+      <div style="margin-top: 14px; display:flex; gap:10px; align-items:center;">
+        <button class="btn" id="submitBtn" type="submit">Submit & Next</button>
+        <button class="btn2" id="skipBtn" type="button">Skip (records blank) & Next</button>
+        <span class="note" id="msg"></span>
+      </div>
+
+      <div class="small" style="margin-top:10px;">
+        Each case is submitted as a separate record to Web3Forms.
+      </div>
+    </form>
+  </div>
+
+  <!-- ===================== DONE ===================== -->
+  <div class="card hidden" id="doneCard">
+    <h2 style="margin:0 0 6px;">Completed</h2>
+    <p class="note"><span class="success">All phases completed.</span> Thank you! You may close this window.</p>
+    <button class="btn2" id="resetBtn" type="button">Reset (start over)</button>
+  </div>
+
+<script>
+/* ===========================
+   CONFIG
+   =========================== */
+const ACCESS_KEY = "2da8fd59-99aa-4132-a414-8af62315092c";
+const DEFAULT_THR = 0.5;
+const DEFAULT_TRAIN_URL = "https://www.dropbox.com/scl/fi/tue9k0lyb26zpaycjxy25/slides-draft.pdf?rlkey=7z9qjtbhch5ffgcff8g0wngwx&dl=0";
+
+const PHASE0_IDS = [29208, 8546, 37379, 40689, 28125, 27048, 33810, 17121, 43042, 43571];
+const PHASE1_IDS = [29208, 8546, 37379, 40689, 28125, 27048, 33810, 17121, 43042, 43571];
+const PHASE2_IDS = [30190, 14299, 29354, 9032, 33751, 20901];
+const PHASE3_IDS = [25151, 45967, 1786, 61660, 45177, 48346, 38750, 24092, 30380, 11549];
+
+
+const CASES = {
+  29208: {"encounterId":29208,"t_decision":"2012-08-03T15:27:00Z","age":63,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":1118.3941666666667,"pred_score":0.99874},
+  8546: {"encounterId":8546,"t_decision":"2012-04-02T22:30:00Z","age":55,"sex":"Female","race":"Malay","HR_cat":"60-100","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":1,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":604.4138888888889,"pred_score":0.992645},
+  37379: {"encounterId":37379,"t_decision":"2013-08-17T08:51:00Z","age":57,"sex":"Female","race":"Malay","HR_cat":"60-100","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":0,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":3.0,"ICU_LOS_h":451.56472222222226,"pred_score":0.980093},
+  40689: {"encounterId":40689,"t_decision":"2013-12-10T11:45:00Z","age":74,"sex":"Male","race":"Chinese","HR_cat":"<60","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":391.94194444444446,"pred_score":0.977681},
+  28125: {"encounterId":28125,"t_decision":"2012-06-19T12:16:00Z","age":65,"sex":"Male","race":"Others","HR_cat":">100","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":246.7952777777778,"pred_score":0.957298},
+  27048: {"encounterId":27048,"t_decision":"2012-09-18T00:58:00Z","age":76,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":"70-105","RSBI_gt105":1,"qsofa":3,"MV_duration_h":1.0,"ICU_LOS_h":113.93111111111111,"pred_score":0.873862},
+  33810: {"encounterId":33810,"t_decision":"2013-05-19T03:39:00Z","age":58,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"7.35-7.45","PF_lt300":1,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":320.3363888888889,"pred_score":0.858618},
+  17121: {"encounterId":17121,"t_decision":"2012-04-15T03:59:00Z","age":75,"sex":"Male","race":"Indian","HR_cat":"60-100","RR_gt20":1,"pH_cat":"7.35-7.45","PF_lt300":1,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":1,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":302.4186111111111,"pred_score":0.801536},
+  43042: {"encounterId":43042,"t_decision":"2012-06-17T07:24:00Z","age":66,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":1,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":105.12027777777777,"pred_score":0.670846},
+  43571: {"encounterId":43571,"t_decision":"2012-05-09T04:45:00Z","age":64,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":72.2925,"pred_score":0.57216},
+  30190: {"encounterId":30190,"t_decision":"2013-03-15T22:44:00Z","age":77,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":64.26611111111112,"pred_score":0.542402},
+  14299: {"encounterId":14299,"t_decision":"2013-05-02T07:45:00Z","age":69,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":119.84944444444444,"pred_score":0.468436},
+  29354: {"encounterId":29354,"t_decision":"2013-01-24T06:30:00Z","age":51,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":121.19083333333333,"pred_score":0.411354},
+  9032: {"encounterId":9032,"t_decision":"2013-12-28T06:14:00Z","age":58,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":50.050555555555555,"pred_score":0.383403},
+  33751: {"encounterId":33751,"t_decision":"2013-09-30T10:11:00Z","age":67,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":101.50333333333333,"pred_score":0.355195},
+  20901: {"encounterId":20901,"t_decision":"2012-08-06T20:50:00Z","age":74,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":182.07805555555555,"pred_score":0.311297},
+  25151: {"encounterId":25151,"t_decision":"2013-11-23T09:43:00Z","age":72,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":59.326388888888886,"pred_score":0.285443},
+  45967: {"encounterId":45967,"t_decision":"2013-12-14T23:28:00Z","age":64,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":38.39472222222222,"pred_score":0.2671},
+  1786: {"encounterId":1786,"t_decision":"2013-10-16T18:35:00Z","age":57,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":59.0125,"pred_score":0.244408},
+  61660: {"encounterId":61660,"t_decision":"2013-06-10T05:21:00Z","age":63,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":55.77916666666667,"pred_score":0.228701},
+  45177: {"encounterId":45177,"t_decision":"2013-12-13T02:41:00Z","age":54,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":39.6075,"pred_score":0.211923},
+  48346: {"encounterId":48346,"t_decision":"2013-11-29T23:29:00Z","age":67,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":84.40333333333334,"pred_score":0.194736},
+  38750: {"encounterId":38750,"t_decision":"2013-11-02T06:49:00Z","age":51,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":43.385555555555555,"pred_score":0.172603},
+  24092: {"encounterId":24092,"t_decision":"2013-05-29T20:00:00Z","age":76,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":64.56083333333333,"pred_score":0.158129},
+  30380: {"encounterId":30380,"t_decision":"2013-12-20T01:48:00Z","age":74,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":57.852222222222224,"pred_score":0.139211},
+  11549: {"encounterId":11549,"t_decision":"2013-10-29T01:22:00Z","age":70,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":95.64138888888888,"pred_score":0.121912}
+};
+
+/* ===========================
+   HELPERS
+   =========================== */
+function $(id){ return document.getElementById(id); }
+function setPill(id, active){ $(id).classList.toggle("active", !!active); }
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function fmtBool01(v, yesTxt, noTxt){ return (Number(v) === 1) ? yesTxt : noTxt; }
+function fmtHours(h){
+  if (h === null || h === undefined || isNaN(h)) return "—";
+  const x = Number(h);
+  if (x < 24) return `${x.toFixed(1)} h`;
+  return `${(x/24).toFixed(1)} days`;
+}
+function fmtDate(iso){
+  try { const d = new Date(iso); if (isNaN(d.getTime())) return "—"; return d.toISOString().slice(0,10); }
+  catch(e){ return "—"; }
+}
+function getParams(){
+  const p = new URLSearchParams(window.location.search);
+  return { thr: p.get("thr") || "", train: p.get("train") || "", admin: p.get("admin") || "" };
+}
+function getThreshold(){
+  const adminInput = $("thr_input") ? $("thr_input").value.trim() : "";
+  if (adminInput !== "" && isFinite(Number(adminInput))) return Number(adminInput);
+  const urlThr = PARAMS.thr.trim();
+  if (urlThr !== "" && isFinite(Number(urlThr))) return Number(urlThr);
+  return DEFAULT_THR;
+}
+function getTrainingURL(){
+  const adminInput = $("training_url") ? $("training_url").value.trim() : "";
+  if (adminInput !== "") return adminInput;
+  const u = PARAMS.train.trim();
+  if (u !== "") return u;
+  return DEFAULT_TRAIN_URL;
+}
+function buildCaseNarrative(c){
+  const lines = [];
+  lines.push(`Patient: ${c.age}-year-old ${c.sex} (${c.race}). Decision date: ${fmtDate(c.t_decision)}.`);
+  lines.push(`Snapshot: HR category ${c.HR_cat} bpm; ${fmtBool01(c.RR_gt20, "RR > 20/min", "RR ≤ 20/min")}; arterial pH ${c.pH_cat}; ${fmtBool01(c.PF_lt300, "PaO₂/FiO₂ < 300", "PaO₂/Fi₂ ≥ 300")}.`.replace("Fi₂","FiO₂"));
+  lines.push(`${fmtBool01(c.Hypercapnia, "Hypercapnia present", "No hypercapnia noted")}; MAP category ${c.MAP_cat} mmHg; ${fmtBool01(c.RSBI_gt105, "RSBI > 105", "RSBI ≤ 105")}; qSOFA = ${c.qsofa}.`);
+  lines.push(`Mechanical ventilation duration: ${fmtHours(c.MV_duration_h)}; ICU LOS so far: ${fmtHours(c.ICU_LOS_h)}.`);
+  lines.push(`Assume this information is the most recent pre-extubation status.`);
+  return lines.join(" ");
+}
+function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
+function aiBinaryLabel(risk, thr){
+  if (!isFinite(risk) || !isFinite(thr)) return "—";
+  // AI is suggesting whether FAILURE will occur within 48h
+  return (risk >= thr)
+    ? "Yes (failure outcome will occur)"
+    : "No (failure outcome will not occur)";
+}
+
+
+/* ===========================
+   WEB3FORMS SUBMIT
+   =========================== */
+async function submitRecord(payload){
+  const url = "https://api.web3forms.com/submit";
+  const fd = new FormData();
+  fd.append("access_key", ACCESS_KEY);
+  for (const [k,v] of Object.entries(payload)) fd.append(k, (v === null || v === undefined) ? "" : String(v));
+
+  try {
+    const res = await fetch(url, { method:"POST", body: fd, mode:"cors", cache:"no-cache" });
+    const json = await res.json();
+    return !!json?.success;
+  } catch (e) {}
+
+  try {
+    const params = new URLSearchParams();
+    params.append("access_key", ACCESS_KEY);
+    for (const [k,v] of Object.entries(payload)) params.append(k, (v === null || v === undefined) ? "" : String(v));
+    const ok = navigator.sendBeacon(url, params);
+    if (ok) return true;
+  } catch (e) {}
+
+  try {
+    let iframe = document.getElementById("w3f_iframe");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.name = "w3f_iframe";
+      iframe.id = "w3f_iframe";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+    }
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = url;
+    form.target = "w3f_iframe";
+
+    for (const [k,v] of fd.entries()) {
+      const inp = document.createElement("input");
+      inp.type = "hidden";
+      inp.name = k;
+      inp.value = v;
+      form.appendChild(inp);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/* ===========================
+   STATE
+   =========================== */
+const PARAMS = getParams();
+
+let state = {
+  started: false,
+  phase: 0,
+  phaseOrder: { 0: [], 1: [], 2: [], 3: [] },
+  idx: 0,
+  caseStartMs: 0,
+  threshold: DEFAULT_THR,
+  trainingURL: DEFAULT_TRAIN_URL
+};
+
+/* ===========================
+   ADMIN MODE
+   =========================== */
+(function adminMode(){
+  const isAdmin = (PARAMS.admin === "1");
+  $("adminSettings").classList.toggle("hidden", !isAdmin);
+  if (isAdmin){
+    if ($("thr_input")) $("thr_input").value = String(isFinite(Number(PARAMS.thr)) ? Number(PARAMS.thr) : DEFAULT_THR);
+    if ($("training_url")) $("training_url").value = (PARAMS.train ? PARAMS.train : DEFAULT_TRAIN_URL);
+  }
+})();
+
+/* ===========================
+   MARKER RENDERING
+   =========================== */
+function setMarker(markerEl, labelEl, pct, text){
+  const p = Math.max(0, Math.min(100, pct));
+  markerEl.style.left = `${p}%`;
+  labelEl.style.left = `${p}%`;
+  labelEl.textContent = text;
+}
+
+/* ===========================
+   RENDERING
+   =========================== */
+function renderProgress(){
+  setPill("p0pill", state.phase === 0);
+  setPill("p1pill", state.phase === 1);
+  setPill("p2pill", state.phase === 2);
+  setPill("p3pill", state.phase === 3);
+  const totalInPhase = state.phaseOrder[state.phase].length;
+  $("casePill").textContent = `Case ${state.idx+1} / ${totalInPhase}`;
+}
+
+function renderPhaseHeader(){
+  if (state.phase === 0){
+    $("phaseTitle").textContent = "Phase 0 — No AI Support";
+    $("phaseIntro").innerHTML = "No AI support is shown in this phase.";
+  } else if (state.phase === 1){
+    $("phaseTitle").textContent = "Phase 1 — AI Support (Binary only)";
+    $("phaseIntro").innerHTML =
+  "You will see binary AI support only: the AI suggests <b>Yes</b> or <b>No</b> to the question of whether <b>failure will occur within 48 hours</b>. No probability or threshold is shown.";
+
+  } else if (state.phase === 2){
+    $("phaseTitle").textContent = "Phase 2 — AI Support (Binary + Risk + Threshold)";
+    const safeUrl = encodeURI(state.trainingURL);
+    $("phaseIntro").innerHTML = `Please review the training document before answering these cases:
+      <a href="${safeUrl}" target="_blank" rel="noopener"><b>Open training document (PDF)</b></a>.`;
+  } else {
+    $("phaseTitle").textContent = "Phase 3 — AI Support (Binary + Risk + Threshold)";
+    $("phaseIntro").innerHTML = "Same AI support format as Phase 2 (binary + risk + threshold).";
+  }
+
+  $("status").textContent =
+    state.phase === 0 ? "Phase 0: No AI support." :
+    state.phase === 1 ? "Phase 1: Binary AI support only." :
+                        "Phase 2/3: Binary + probability + threshold support.";
+}
+
+function clearYesNo(){
+  document.querySelectorAll('input[name="human_failure_prediction"]').forEach(r => r.checked = false);
+}
+function getYesNo(){
+  const r = document.querySelector('input[name="human_failure_prediction"]:checked');
+  return r ? r.value : "";
+}
+
+function renderCurrentCase(){
+  renderProgress();
+  renderPhaseHeader();
+
+  const id = state.phaseOrder[state.phase][state.idx];
+  const c = CASES[id];
+
+  // Always apply phase bar visibility even if something goes wrong
+  $("aiBarWrap").classList.toggle("hidden", (state.phase === 0 || state.phase === 1));
+  $("aiBinaryRow").classList.toggle("hidden", state.phase === 0);
+
+  if (!c){
+    $("caseHeader").textContent = "Case —";
+    $("caseText").textContent = "Error: case data not found.";
+    $("aiSupportBinary").textContent = "—";
+    $("aiPanel").classList.add("hidden");
+    $("aiReadout").textContent = "AI: —";
+    ["aiMarker","aiMarkerLabel","thrMarker","thrMarkerLabel"].forEach(x => $(x).classList.add("hidden"));
+    return;
+  }
+
+  $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
+  $("caseText").textContent = buildCaseNarrative(c);
+
+  const risk = Number(c.pred_score);
+  const thr = state.threshold;
+  const showProb = (state.phase === 2 || state.phase === 3);
+
+  // AI support label
+  $("aiSupportBinary").textContent = (state.phase === 0) ? "None" : aiBinaryLabel(risk, thr);
+
+  // Probability panel
+  $("aiPanel").classList.toggle("hidden", !showProb);
+  $("aiRiskLabel").textContent = showProb && isFinite(risk) ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`) : "—";
+
+  // Markers
+  const aiMarker = $("aiMarker");
+  const aiMarkerLabel = $("aiMarkerLabel");
+  const thrMarker = $("thrMarker");
+  const thrMarkerLabel = $("thrMarkerLabel");
+
+  if (state.phase === 0){
+    $("aiReadout").textContent = "AI: none";
+    aiMarker.classList.add("hidden"); aiMarkerLabel.classList.add("hidden");
+    thrMarker.classList.add("hidden"); thrMarkerLabel.classList.add("hidden");
+  } else {
+    if (showProb && isFinite(risk)){
+      const riskPct = risk * 100;
+      aiMarker.classList.remove("hidden"); aiMarkerLabel.classList.remove("hidden");
+      setMarker(aiMarker, aiMarkerLabel, riskPct, `AI risk ${Math.round(riskPct)}%`);
+      $("aiReadout").textContent = `AI: ${Math.round(riskPct)}% (${aiBinaryLabel(risk, thr)})`;
+    } else {
+      aiMarker.classList.add("hidden"); aiMarkerLabel.classList.add("hidden");
+      $("aiReadout").textContent = `AI: ${aiBinaryLabel(risk, thr)}`;
+    }
+
+    if (showProb && isFinite(thr)){
+      const thrPct = thr * 100;
+      thrMarker.classList.remove("hidden"); thrMarkerLabel.classList.remove("hidden");
+      setMarker(thrMarker, thrMarkerLabel, thrPct, `Threshold ${Math.round(thrPct)}%`);
+    } else {
+      thrMarker.classList.add("hidden"); thrMarkerLabel.classList.add("hidden");
+    }
+  }
+
+  clearYesNo();
+  $("rationale").value = "";
+  $("msg").textContent = "";
+  state.caseStartMs = Date.now();
+}
+
+/* ===========================
+   UI SHOW/HIDE
+   =========================== */
+function showOnly(elId){
+  ["setupCard","progressCard","caseCard","doneCard"].forEach(id => {
+    $(id).classList.toggle("hidden", id !== elId);
+  });
+}
+function showMain(){
+  $("progressCard").classList.remove("hidden");
+  $("caseCard").classList.remove("hidden");
+  $("doneCard").classList.add("hidden");
+}
+
+/* ===========================
+   START
+   =========================== */
+$("startBtn").addEventListener("click", () => {
+  const did = $("doctor_id").value.trim();
+  if (!did){
+    $("setupMsg").innerHTML = '<span class="warn">Doctor ID is required.</span>';
+    return;
+  }
+
+  state.threshold = getThreshold();
+  state.trainingURL = getTrainingURL();
+
+  state.phaseOrder[0] = shuffle(PHASE0_IDS);
+  state.phaseOrder[1] = shuffle(PHASE1_IDS);
+  state.phaseOrder[2] = shuffle(PHASE2_IDS);
+  state.phaseOrder[3] = shuffle(PHASE3_IDS);
+
+  state.phase = 0;
+  state.idx = 0;
+  state.started = true;
+
+  $("setupMsg").textContent = "";
+  showMain();
+  renderCurrentCase();
+});
+
+/* ===========================
+   SUBMIT CASE RECORD
+   =========================== */
+async function handleCaseSubmit(isSkip){
+  $("submitBtn").disabled = true;
+  $("skipBtn").disabled = true;
+  $("msg").textContent = "Submitting…";
+
+  const id = state.phaseOrder[state.phase][state.idx];
+  const c = CASES[id];
+  const now = Date.now();
+  const time_seconds = Math.max(0, Math.round((now - state.caseStartMs)/1000));
+
+  const doctor_id = $("doctor_id").value.trim();
+  const specialty = $("specialty").value.trim();
+  const years_exp = $("years_exp").value.trim();
+  const group_id = $("group_id").value.trim();
+
+  let human_failure_prediction = "";
+  let rationale = "";
+
+  if (!isSkip){
+    human_failure_prediction = getYesNo();
+    rationale = $("rationale").value.trim();
+  }
+
+  const risk = c ? Number(c.pred_score) : NaN;
+  const thr = state.threshold;
+  const showProb = (state.phase === 2 || state.phase === 3);
+
+  const payload = {
+    submission_id: makeSubmissionId(),
+    doctor_id, specialty, years_exp, group_id,
+    phase: state.phase,
+    phase_case_index: state.idx + 1,
+    encounter_id: c ? c.encounterId : "",
+    t_decision: c ? c.t_decision : "",
+
+    ai_support_present: (state.phase === 0) ? "no" : "yes",
+    ai_support_type:
+      (state.phase === 0) ? "none" :
+      (state.phase === 1) ? "binary_only" :
+      "binary_plus_risk_plus_threshold",
+
+    ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk, thr),
+
+    risk_score_shown: (showProb && c && isFinite(risk)) ? risk.toFixed(6) : "",
+    risk_percent_shown: (showProb && c && isFinite(risk)) ? String(Math.round(risk*100)) : "",
+    threshold_shown: (showProb && isFinite(thr)) ? thr.toFixed(6) : "",
+
+    human_failure_prediction,
+    rationale,
+    time_seconds
+  };
+
+  // Add snapshot only if case exists
+  if (c){
+    Object.assign(payload, {
+      age: c.age, sex: c.sex, race: c.race,
+      HR_cat: c.HR_cat, RR_gt20: c.RR_gt20, pH_cat: c.pH_cat, PF_lt300: c.PF_lt300,
+      Hypercapnia: c.Hypercapnia, MAP_cat: c.MAP_cat, RSBI_gt105: c.RSBI_gt105, qsofa: c.qsofa,
+      MV_duration_h: c.MV_duration_h, ICU_LOS_h: c.ICU_LOS_h
+    });
+  }
+
+  try{
+    const ok = await submitRecord(payload);
+    if (!ok){
+      $("msg").innerHTML = '<span class="warn">Submission failed.</span> Check connection / key / Web3Forms domain settings.';
+      $("submitBtn").disabled = false;
+      $("skipBtn").disabled = false;
+      return;
+    }
+    $("msg").innerHTML = '<span class="success">Saved.</span>';
+    setTimeout(() => advance(), 250);
+  } catch(e){
+    $("msg").innerHTML = '<span class="warn">Submission error.</span> ' + (e?.message || "");
+    $("submitBtn").disabled = false;
+    $("skipBtn").disabled = false;
+  }
+}
+
+function advance(){
+  $("submitBtn").disabled = false;
+  $("skipBtn").disabled = false;
+
+  const total = state.phaseOrder[state.phase].length;
+  if (state.idx < total - 1){
+    state.idx += 1;
+    renderCurrentCase();
+    return;
+  }
+
+  if (state.phase === 0){ state.phase = 1; state.idx = 0; renderCurrentCase(); return; }
+  if (state.phase === 1){ state.phase = 2; state.idx = 0; renderCurrentCase(); return; }
+  if (state.phase === 2){ state.phase = 3; state.idx = 0; renderCurrentCase(); return; }
+
+  $("caseCard").classList.add("hidden");
+  $("doneCard").classList.remove("hidden");
+  $("status").innerHTML = '<span class="success">All phases completed.</span> Thank you!';
+}
+
+/* ===========================
+   EVENTS
+   =========================== */
+$("answerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const yn = getYesNo();
+  if (!yn){
+    $("msg").innerHTML = '<span class="warn">Please select Yes or No before submitting.</span>';
+    return;
+  }
+  await handleCaseSubmit(false);
+});
+$("skipBtn").addEventListener("click", async () => {
+  await handleCaseSubmit(true);
+});
+
+/* ===========================
+   RESET
+   =========================== */
+$("resetBtn").addEventListener("click", () => {
+  state.started = false;
+  state.phase = 0;
+  state.idx = 0;
+  state.phaseOrder[0] = [];
+  state.phaseOrder[1] = [];
+  state.phaseOrder[2] = [];
+  state.phaseOrder[3] = [];
+  $("setupMsg").textContent = "";
+  showOnly("setupCard");
+});
+
+/* ===========================
+   INITIAL VIEW
+   =========================== */
+showOnly("setupCard");
+</script>
+</body>
+</html>
