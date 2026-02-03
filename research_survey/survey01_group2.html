@@ -371,56 +371,38 @@ function aiBinaryLabel(risk, thr){
    =========================== */
 async function submitRecord(payload){
   const url = "https://api.web3forms.com/submit";
-  const fd = new FormData();
-  fd.append("access_key", ACCESS_KEY);
-  for (const [k,v] of Object.entries(payload)) fd.append(k, (v === null || v === undefined) ? "" : String(v));
 
   try {
-    const res = await fetch(url, { method:"POST", body: fd, mode:"cors", cache:"no-cache" });
-    const json = await res.json();
-    return !!json?.success;
-  } catch (e) {}
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        access_key: ACCESS_KEY,
+        ...payload
+      })
+    });
 
-  try {
-    const params = new URLSearchParams();
-    params.append("access_key", ACCESS_KEY);
-    for (const [k,v] of Object.entries(payload)) params.append(k, (v === null || v === undefined) ? "" : String(v));
-    const ok = navigator.sendBeacon(url, params);
-    if (ok) return true;
-  } catch (e) {}
+    const json = await res.json().catch(() => ({}));
 
-  try {
-    let iframe = document.getElementById("w3f_iframe");
-    if (!iframe) {
-      iframe = document.createElement("iframe");
-      iframe.name = "w3f_iframe";
-      iframe.id = "w3f_iframe";
-      iframe.style.display = "none";
-      document.body.appendChild(iframe);
-    }
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = url;
-    form.target = "w3f_iframe";
-
-    for (const [k,v] of fd.entries()) {
-      const inp = document.createElement("input");
-      inp.type = "hidden";
-      inp.name = k;
-      inp.value = v;
-      form.appendChild(inp);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
-    return true;
+    // Return both success + message so you can show the real reason
+    return {
+      ok: !!json.success,
+      status: res.status,
+      message: json.message || json.error || "Unknown response",
+      raw: json
+    };
   } catch (e) {
-    return false;
+    return {
+      ok: false,
+      status: 0,
+      message: e?.message || "Network error / blocked request",
+      raw: null
+    };
   }
 }
-
 /* ===========================
    STATE
    =========================== */
@@ -681,15 +663,18 @@ async function handleCaseSubmit(isSkip){
   }
 
   try{
-    const ok = await submitRecord(payload);
-    if (!ok){
-      $("msg").innerHTML = '<span class="warn">Submission failed.</span> Check connection / key / Web3Forms domain settings.';
+
+    const result = await submitRecord(payload);
+
+    if (!result.ok){
+      $("msg").innerHTML =
+        `<span class="warn">Submission failed.</span> ` +
+        `(${result.status || "no status"}) ${result.message}`;
       $("submitBtn").disabled = false;
       $("skipBtn").disabled = false;
       return;
     }
-    $("msg").innerHTML = '<span class="success">Saved.</span>';
-    setTimeout(() => advance(), 250);
+
   } catch(e){
     $("msg").innerHTML = '<span class="warn">Submission error.</span> ' + (e?.message || "");
     $("submitBtn").disabled = false;
