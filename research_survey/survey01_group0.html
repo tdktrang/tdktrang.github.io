@@ -85,12 +85,12 @@
 <body>
   <h1>CTICU Extubation Decision Survey — Group 0</h1>
   <p class="note">
-    Thank you for participating in this study.  
+    Thank you for participating in this study.
     This survey is designed to better understand <b>clinical decision-making around extubation in the ICU</b> and how different forms of decision support may influence judgments about patient outcomes.
     <br/><br/>
-    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would experience a failure outcome (e.g., reintubation or need for non-invasive ventilation within 48 hours).
+    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would require <b>reintubation within 48 hours</b>.
     <br/><br/>
-    The survey typically takes approximately <b>30 minutes</b> to complete.  
+    The survey typically takes approximately <b>30 minutes</b> to complete.
     Please respond based on your clinical judgment.
     <br/><br/>
     Thank you for your time and contribution to this research.
@@ -123,9 +123,7 @@
       </div>
       <div>
         <label for="group_id">Group / Arm (optional)</label>
-        <!-- <input id="group_id" placeholder="e.g., A / B / C" /> -->
-         <input id="group_id" value="Group 0" readonly />
-
+        <input id="group_id" value="Group 0" readonly />
       </div>
     </div>
 
@@ -186,24 +184,24 @@
       <div class="kv" id="aiBinaryRow">AI Support (binary): <b id="aiSupportBinary">—</b></div>
 
       <div id="aiPanel" class="hidden" style="margin-top:8px;">
-        <div class="kv">AI Risk (failure probability): <b id="aiRiskLabel">—</b></div>
+        <div class="kv">AI Risk (reintubation probability): <b id="aiRiskLabel">—</b></div>
       </div>
     </div>
 
     <form id="answerForm">
       <div class="questionBox">
         <div style="font-weight:800;">
-          If extubate now, will the patient have the failure outcome such as (reintubation, NIV,… within 48 hours):
+          If extubated now, will the patient require reintubation within 48 hours?
         </div>
 
-        <div class="ynRow" role="radiogroup" aria-label="Failure prediction yes/no">
+        <div class="ynRow" role="radiogroup" aria-label="Reintubation within 48 hours yes/no">
           <label class="ynChoice">
-            <input type="radio" name="human_failure_prediction" value="yes" />
-            <b>Yes</b> (failure outcome will occur)
+            <input type="radio" name="human_reintubation_prediction" value="yes" />
+            <b>Yes</b> (will require reintubation within 48 hours)
           </label>
           <label class="ynChoice">
-            <input type="radio" name="human_failure_prediction" value="no" />
-            <b>No</b> (failure outcome will not occur)
+            <input type="radio" name="human_reintubation_prediction" value="no" />
+            <b>No</b> (will NOT require reintubation within 48 hours)
           </label>
         </div>
         <div class="small" style="margin-top:8px;">
@@ -212,11 +210,11 @@
       </div>
 
       <!-- AI display bar (HIDDEN in Phase 0) -->
-      <div id="aiBarWrap" class="barWrap">
+      <div id="aiBarWrap" class="barWrap hidden">
         <div class="barTopRow">
           <div class="note" style="margin:0;">
-            <b>0</b> = low failure risk &nbsp;•&nbsp;
-            <b>100</b> = high failure risk
+            <b>0</b> = low reintubation risk &nbsp;•&nbsp;
+            <b>100</b> = high reintubation risk
           </div>
           <span class="pillBox" id="aiReadout">AI: —</span>
         </div>
@@ -238,9 +236,8 @@
         </div>
 
         <div class="small" style="margin-top:8px;">
-          The blue marker shows the AI-estimated probability of failure on this scale.
+          The blue marker shows the AI-estimated probability of reintubation within 48 hours on this scale.
         </div>
-
       </div>
 
       <label>Rationale (optional)</label>
@@ -277,7 +274,6 @@ const PHASE0_IDS = [29208];
 const PHASE1_IDS = [29208];
 const PHASE2_IDS = [30190];
 const PHASE3_IDS = [25151];
-
 
 const CASES = {
   29208: {"encounterId":29208,"t_decision":"2012-08-03T15:27:00Z","age":63,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":1118.3941666666667,"pred_score":0.99874},
@@ -328,10 +324,6 @@ function fmtHours(h){
   if (x < 24) return `${x.toFixed(1)} h`;
   return `${(x/24).toFixed(1)} days`;
 }
-function fmtDate(iso){
-  try { const d = new Date(iso); if (isNaN(d.getTime())) return "—"; return d.toISOString().slice(0,10); }
-  catch(e){ return "—"; }
-}
 function getParams(){
   const p = new URLSearchParams(window.location.search);
   return { thr: p.get("thr") || "", train: p.get("train") || "", admin: p.get("admin") || "" };
@@ -341,7 +333,7 @@ function getThreshold(){
   if (adminInput !== "" && isFinite(Number(adminInput))) return Number(adminInput);
   const urlThr = PARAMS.thr.trim();
   if (urlThr !== "" && isFinite(Number(urlThr))) return Number(urlThr);
-  return DEFAULT_THR;
+  return DEFAULT_THR; // can be null
 }
 function getTrainingURL(){
   const adminInput = $("training_url") ? $("training_url").value.trim() : "";
@@ -353,21 +345,21 @@ function getTrainingURL(){
 function buildCaseNarrative(c){
   const lines = [];
   lines.push(`Patient: ${c.age}-year-old ${c.sex} (${c.race})`);
-  lines.push(`Snapshot: HR category ${c.HR_cat} bpm; ${fmtBool01(c.RR_gt20, "RR > 20/min", "RR ≤ 20/min")}; arterial pH ${c.pH_cat}; ${fmtBool01(c.PF_lt300, "PaO₂/FiO₂ < 300", "PaO₂/Fi₂ ≥ 300")}.`.replace("Fi₂","FiO₂"));
+  lines.push(`Snapshot: HR category ${c.HR_cat} bpm; ${fmtBool01(c.RR_gt20, "RR > 20/min", "RR ≤ 20/min")}; arterial pH ${c.pH_cat}; ${fmtBool01(c.PF_lt300, "PaO₂/FiO₂ < 300", "PaO₂/FiO₂ ≥ 300")}.`);
   lines.push(`${fmtBool01(c.Hypercapnia, "Hypercapnia present", "No hypercapnia noted")}; MAP category ${c.MAP_cat} mmHg; ${fmtBool01(c.RSBI_gt105, "RSBI > 105", "RSBI ≤ 105")}; qSOFA = ${c.qsofa}.`);
   lines.push(`Mechanical ventilation duration: ${fmtHours(c.MV_duration_h)}; ICU LOS so far: ${fmtHours(c.ICU_LOS_h)}.`);
   lines.push(`Assume this information is the most recent pre-extubation status.`);
   return lines.join(" ");
 }
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
-function aiBinaryLabel(risk){
+
+// AI binary label now matches YOUR question (reintubation within 48h)
+function aiBinaryLabelReintub(risk){
   if (!isFinite(risk)) return "—";
   return (risk >= 0.5)
-    ? "Yes (failure outcome will occur)"
-    : "No (failure outcome will not occur)";
+    ? "Yes (will require reintubation within 48 hours)"
+    : "No (will NOT require reintubation within 48 hours)";
 }
-
-
 
 /* ===========================
    WEB3FORMS SUBMIT
@@ -446,7 +438,10 @@ let state = {
   const isAdmin = (PARAMS.admin === "1");
   $("adminSettings").classList.toggle("hidden", !isAdmin);
   if (isAdmin){
-    if ($("thr_input")) $("thr_input").value = String(isFinite(Number(PARAMS.thr)) ? Number(PARAMS.thr) : DEFAULT_THR);
+    if ($("thr_input")) {
+      const v = isFinite(Number(PARAMS.thr)) ? Number(PARAMS.thr) : DEFAULT_THR;
+      $("thr_input").value = (v === null ? "" : String(v));
+    }
     if ($("training_url")) $("training_url").value = (PARAMS.train ? PARAMS.train : DEFAULT_TRAIN_URL);
   }
 })();
@@ -480,8 +475,7 @@ function renderPhaseHeader(){
   } else if (state.phase === 1){
     $("phaseTitle").textContent = "Phase 1 — AI Support (Binary only)";
     $("phaseIntro").innerHTML =
-  "You will see binary AI support only: the AI suggests <b>Yes</b> or <b>No</b> to the question of whether <b>failure will occur within 48 hours</b>. No probability or threshold is shown.";
-
+      "You will see binary AI support only: the AI suggests <b>Yes</b> or <b>No</b> to the question of whether the patient will require <b>reintubation within 48 hours</b>. No probability or threshold is shown.";
   } else if (state.phase === 2){
     $("phaseTitle").textContent = "Phase 2 — AI Support (Binary only)";
     const safeUrl = encodeURI(state.trainingURL);
@@ -489,20 +483,20 @@ function renderPhaseHeader(){
       <a href="${safeUrl}" target="_blank" rel="noopener"><b>Open training document (PDF)</b></a>.`;
   } else {
     $("phaseTitle").textContent = "Phase 3 — AI Support (Binary only)";
-    $("phaseIntro").innerHTML = "You will see the same AI support as before: binary suggestion and estimated risk.";
+    $("phaseIntro").innerHTML = "You will see the same AI support as before: a binary suggestion related to <b>reintubation within 48 hours</b>.";
   }
 
   $("status").textContent =
     state.phase === 0 ? "Phase 0: No AI support." :
     state.phase === 1 ? "Phase 1: Binary AI support only." :
-                        "Phase 2/3: Binary + probability + threshold support.";
+                        "Phase 2/3: Binary AI support only.";
 }
 
 function clearYesNo(){
-  document.querySelectorAll('input[name="human_failure_prediction"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="human_reintubation_prediction"]').forEach(r => r.checked = false);
 }
 function getYesNo(){
-  const r = document.querySelector('input[name="human_failure_prediction"]:checked');
+  const r = document.querySelector('input[name="human_reintubation_prediction"]:checked');
   return r ? r.value : "";
 }
 
@@ -513,15 +507,15 @@ function renderCurrentCase(){
   const id = state.phaseOrder[state.phase][state.idx];
   const c = CASES[id];
 
-  // Always apply phase bar visibility even if something goes wrong
-  $("aiBarWrap").classList.add("hidden");
+  // Phase-specific visibility
   $("aiBinaryRow").classList.toggle("hidden", state.phase === 0);
+  $("aiBarWrap").classList.add("hidden"); // Group 0 currently not showing probability bar
+  $("aiPanel").classList.add("hidden");
 
   if (!c){
     $("caseHeader").textContent = "Case —";
     $("caseText").textContent = "Error: case data not found.";
     $("aiSupportBinary").textContent = "—";
-    $("aiPanel").classList.add("hidden");
     $("aiReadout").textContent = "AI: —";
     ["aiMarker","aiMarkerLabel","thrMarker","thrMarkerLabel"].forEach(x => $(x).classList.add("hidden"));
     return;
@@ -531,42 +525,18 @@ function renderCurrentCase(){
   $("caseText").textContent = buildCaseNarrative(c);
 
   const risk = Number(c.pred_score);
-  const thr = state.threshold;
-  // const showProb = (state.phase === 2 || state.phase === 3);
 
-  // AI support label
-  $("aiSupportBinary").textContent = (state.phase === 0) ? "None" : aiBinaryLabel(risk, thr);
+  // AI support label (now matches reintubation question)
+  $("aiSupportBinary").textContent = (state.phase === 0) ? "None" : aiBinaryLabelReintub(risk);
 
-  // Probability panel
-  // $("aiPanel").classList.toggle("hidden", !showProb);
-  // $("aiRiskLabel").textContent = showProb && isFinite(risk) ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`) : "—";
-  $("aiPanel").classList.add("hidden");
-  $("aiRiskLabel").textContent = "—";
-
-  // Markers
-  const aiMarker = $("aiMarker");
-  const aiMarkerLabel = $("aiMarkerLabel");
-  const thrMarker = $("thrMarker");
-  const thrMarkerLabel = $("thrMarkerLabel");
-
+  // Keep readout consistent even if bar hidden
   if (state.phase === 0){
     $("aiReadout").textContent = "AI: none";
-    aiMarker.classList.add("hidden"); aiMarkerLabel.classList.add("hidden");
-    thrMarker.classList.add("hidden"); thrMarkerLabel.classList.add("hidden");
   } else {
-    if (showProb && isFinite(risk)){
-      const riskPct = risk * 100;
-      aiMarker.classList.remove("hidden"); aiMarkerLabel.classList.remove("hidden");
-      setMarker(aiMarker, aiMarkerLabel, riskPct, `AI risk ${Math.round(riskPct)}%`);
-      $("aiReadout").textContent = `AI: ${Math.round(riskPct)}% (${aiBinaryLabel(risk, thr)})`;
-    } else {
-      aiMarker.classList.add("hidden"); aiMarkerLabel.classList.add("hidden");
-      $("aiReadout").textContent = `AI: ${aiBinaryLabel(risk, thr)}`;
-    }
-
-    thrMarker.classList.add("hidden");
-    thrMarkerLabel.classList.add("hidden");
-
+    const riskPct = isFinite(risk) ? Math.round(risk * 100) : NaN;
+    $("aiReadout").textContent = isFinite(riskPct)
+      ? `AI: ${riskPct}% (${aiBinaryLabelReintub(risk)})`
+      : `AI: ${aiBinaryLabelReintub(risk)}`;
   }
 
   clearYesNo();
@@ -634,17 +604,15 @@ async function handleCaseSubmit(isSkip){
   const years_exp = $("years_exp").value.trim();
   const group_id = $("group_id").value.trim();
 
-  let human_failure_prediction = "";
+  let human_reintubation_prediction = "";
   let rationale = "";
 
   if (!isSkip){
-    human_failure_prediction = getYesNo();
+    human_reintubation_prediction = getYesNo();
     rationale = $("rationale").value.trim();
   }
 
   const risk = c ? Number(c.pred_score) : NaN;
-  const thr = state.threshold;
-  const showProb = (state.phase === 2 || state.phase === 3);
 
   const payload = {
     submission_id: makeSubmissionId(),
@@ -655,21 +623,21 @@ async function handleCaseSubmit(isSkip){
     t_decision: c ? c.t_decision : "",
 
     ai_support_present: (state.phase === 0) ? "no" : "yes",
-    ai_support_type:
-      (state.phase === 0) ? "none" : "binary_only",
+    ai_support_type: (state.phase === 0) ? "none" : "binary_only",
 
-    ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk),
+    // label shown now matches reintubation question
+    ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabelReintub(risk),
 
+    // kept blank in this Group 0 page (no probability bar shown)
     risk_score_shown: "",
     risk_percent_shown: "",
     threshold_shown: "",
 
-    human_failure_prediction,
+    human_reintubation_prediction,
     rationale,
     time_seconds
   };
 
-  // Add snapshot only if case exists
   if (c){
     Object.assign(payload, {
       age: c.age, sex: c.sex, race: c.race,
