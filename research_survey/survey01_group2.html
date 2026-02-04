@@ -88,12 +88,14 @@
     Thank you for participating in this study.
     This survey is designed to better understand <b>clinical decision-making around extubation in the ICU</b> and how different forms of decision support may influence judgments about patient outcomes.
     <br/><br/>
-    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would experience a failure outcome (e.g., reintubation or need for non-invasive ventilation within 48 hours).
+    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would require <b>reintubation within 48 hours</b>.
     <br/><br/>
     The survey typically takes approximately <b>30 minutes</b> to complete.
     Please respond based on your clinical judgment.
     <br/><br/>
     Thank you for your time and contribution to this research.
+    <br/><br/>
+    If you have any questions or problems please contact <a href="mailto:tdktrang@vt.edu">tdktrang@vt.edu</a>.
   </p>
 
   <!-- ===================== SETUP ===================== -->
@@ -182,26 +184,27 @@
       <div class="kv" id="aiBinaryRow">AI Support (binary): <b id="aiSupportBinary">—</b></div>
 
       <div id="aiPanel" class="hidden" style="margin-top:8px;">
-        <div class="kv">AI Risk (failure probability): <b id="aiRiskLabel">—</b></div>
+        <div class="kv">AI Risk (reintubation probability): <b id="aiRiskLabel">—</b></div>
       </div>
     </div>
 
     <form id="answerForm">
       <div class="questionBox">
         <div style="font-weight:800;">
-          If extubate now, will the patient have the failure outcome such as (reintubation, NIV,… within 48 hours):
+          If extubated now, will the patient require reintubation within 48 hours?
         </div>
 
-        <div class="ynRow" role="radiogroup" aria-label="Failure prediction yes/no">
+        <div class="ynRow" role="radiogroup" aria-label="Reintubation within 48 hours yes/no">
           <label class="ynChoice">
-            <input type="radio" name="human_failure_prediction" value="yes" />
-            <b>Yes</b> (failure outcome will occur)
+            <input type="radio" name="human_reintubation_prediction" value="yes" />
+            <b>Yes</b> (will require reintubation within 48 hours)
           </label>
           <label class="ynChoice">
-            <input type="radio" name="human_failure_prediction" value="no" />
-            <b>No</b> (failure outcome will not occur)
+            <input type="radio" name="human_reintubation_prediction" value="no" />
+            <b>No</b> (will NOT require reintubation within 48 hours)
           </label>
         </div>
+
         <div class="small" style="margin-top:8px;">
           Your response is <b>Yes/No only</b>.
         </div>
@@ -211,8 +214,8 @@
       <div id="aiBarWrap" class="barWrap">
         <div class="barTopRow">
           <div class="note" style="margin:0;">
-            <b>0</b> = low failure risk &nbsp;•&nbsp;
-            <b>100</b> = high failure risk
+            <b>0</b> = low reintubation risk &nbsp;•&nbsp;
+            <b>100</b> = high reintubation risk
           </div>
           <span class="pillBox" id="aiReadout">AI: —</span>
         </div>
@@ -234,7 +237,7 @@
         </div>
 
         <div class="small" style="margin-top:8px;">
-          Phase 2/3: Blue marker shows AI failure-risk (%) on this same scale. Red marker shows threshold (e.g., 0.5 = 50%).
+          Phase 2/3: Blue marker shows AI reintubation-risk (%) on this same scale. Red marker shows threshold (e.g., 0.5 = 50%).
         </div>
       </div>
 
@@ -337,11 +340,13 @@ function buildCaseNarrative(c){
   return lines.join(" ");
 }
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
+
+// UPDATED: binary aligns to reintubation question, uses threshold for yes/no
 function aiBinaryLabel(risk, thr){
   if (!isFinite(risk) || !isFinite(thr)) return "—";
   return (risk >= thr)
-    ? "Yes (failure outcome will occur)"
-    : "No (failure outcome will not occur)";
+    ? "Yes (will require reintubation within 48 hours)"
+    : "No (will NOT require reintubation within 48 hours)";
 }
 
 /* ===========================
@@ -440,7 +445,7 @@ function renderPhaseHeader(){
   } else if (state.phase === 1){
     $("phaseTitle").textContent = "Phase 1 — AI Support (Binary only)";
     $("phaseIntro").innerHTML =
-      "You will see binary AI support only: the AI suggests <b>Yes</b> or <b>No</b> to the question of whether <b>failure will occur within 48 hours</b>. No probability or threshold is shown.";
+      "You will see binary AI support only: the AI suggests <b>Yes</b> or <b>No</b> to the question of whether the patient will require <b>reintubation within 48 hours</b>. No probability or threshold is shown.";
   } else if (state.phase === 2){
     $("phaseTitle").textContent = "Phase 2 — AI Support (Binary + Risk + Threshold)";
     const safeUrl = encodeURI(state.trainingURL);
@@ -458,10 +463,10 @@ function renderPhaseHeader(){
 }
 
 function clearYesNo(){
-  document.querySelectorAll('input[name="human_failure_prediction"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="human_reintubation_prediction"]').forEach(r => r.checked = false);
 }
 function getYesNo(){
-  const r = document.querySelector('input[name="human_failure_prediction"]:checked');
+  const r = document.querySelector('input[name="human_reintubation_prediction"]:checked');
   return r ? r.value : "";
 }
 
@@ -574,7 +579,7 @@ $("startBtn").addEventListener("click", () => {
 });
 
 /* ===========================
-   SUBMIT CASE RECORD (FIXED)
+   SUBMIT CASE RECORD
    =========================== */
 async function handleCaseSubmit(isSkip){
   $("submitBtn").disabled = true;
@@ -591,11 +596,11 @@ async function handleCaseSubmit(isSkip){
   const years_exp = $("years_exp").value.trim();
   const group_id = $("group_id").value.trim();
 
-  let human_failure_prediction = "";
+  let human_reintubation_prediction = "";
   let rationale = "";
 
   if (!isSkip){
-    human_failure_prediction = getYesNo();
+    human_reintubation_prediction = getYesNo();
     rationale = $("rationale").value.trim();
   }
 
@@ -619,11 +624,12 @@ async function handleCaseSubmit(isSkip){
 
     ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk, thr),
 
+    // AI risk of REINTUBATION within 48h
     risk_score_shown: (showProb && c && isFinite(risk)) ? risk.toFixed(6) : "",
     risk_percent_shown: (showProb && c && isFinite(risk)) ? String(Math.round(risk*100)) : "",
     threshold_shown: (showProb && isFinite(thr)) ? thr.toFixed(6) : "",
 
-    human_failure_prediction,
+    human_reintubation_prediction,
     rationale,
     time_seconds
   };
@@ -648,7 +654,6 @@ async function handleCaseSubmit(isSkip){
     return;
   }
 
-  // ✅ SUCCESS: show message, then advance
   $("msg").innerHTML = '<span class="success">Saved.</span>';
   setTimeout(() => advance(), 250);
 }
