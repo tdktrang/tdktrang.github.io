@@ -340,7 +340,7 @@ function getTrainingURL(){
 }
 function buildCaseNarrative(c){
   const lines = [];
-  lines.push(`Patient: ${c.age}-year-old ${c.sex} (${c.race}). Decision date: ${fmtDate(c.t_decision)}.`);
+  lines.push(`Patient: ${c.age}-year-old ${c.sex} (${c.race}).`);
   lines.push(`Snapshot: HR category ${c.HR_cat} bpm; ${fmtBool01(c.RR_gt20, "RR > 20/min", "RR ≤ 20/min")}; arterial pH ${c.pH_cat}; ${fmtBool01(c.PF_lt300, "PaO₂/FiO₂ < 300", "PaO₂/Fi₂ ≥ 300")}.`.replace("Fi₂","FiO₂"));
   lines.push(`${fmtBool01(c.Hypercapnia, "Hypercapnia present", "No hypercapnia noted")}; MAP category ${c.MAP_cat} mmHg; ${fmtBool01(c.RSBI_gt105, "RSBI > 105", "RSBI ≤ 105")}; qSOFA = ${c.qsofa}.`);
   lines.push(`Mechanical ventilation duration: ${fmtHours(c.MV_duration_h)}; ICU LOS so far: ${fmtHours(c.ICU_LOS_h)}.`);
