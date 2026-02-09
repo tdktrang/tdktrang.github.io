@@ -582,7 +582,7 @@ function renderCurrentCase(){
   $("aiSupportBinary").textContent = (state.phase === 0) ? "None" : aiBinaryLabel(risk, thr);
 
   $("aiPanel").classList.toggle("hidden", !showProb);
-  $("aiRiskLabel").textContent = showProb && isFinite(risk) ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`) : "—";
+  $("aiRiskLabel").textContent = showProb && isFinite(risk) ? (risk.toFixed(3) + ` (${Math.round(risk)}%)`) : "—";
 
   const aiMarker = $("aiMarker");
   const aiMarkerLabel = $("aiMarkerLabel");
@@ -595,7 +595,7 @@ function renderCurrentCase(){
     thrMarker.classList.add("hidden"); thrMarkerLabel.classList.add("hidden");
   } else {
     if (isFinite(risk)){
-      const riskPct = risk * 100;
+      const riskPct = risk;
       aiMarker.classList.remove("hidden"); aiMarkerLabel.classList.remove("hidden");
       setMarker(aiMarker, aiMarkerLabel, riskPct, `AI risk ${Math.round(riskPct)}%`);
       $("aiReadout").textContent = `AI: ${Math.round(riskPct)}% (${aiBinaryLabel(risk, thr)})`;
