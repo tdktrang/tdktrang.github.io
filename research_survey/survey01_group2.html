@@ -79,6 +79,16 @@
     .ynChoice { display:flex; gap: 8px; align-items:center; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; background:#fff; cursor:pointer; }
     .ynChoice input { width:auto; margin:0; padding:0; }
     .questionBox { padding: 12px; border:1px solid var(--border); border-radius: 14px; background:#fff; margin-top: 12px; }
+
+    /* ===== Patient table (match Group 0 / updated Group 1) ===== */
+    table { width:100%; border-collapse: collapse; margin-top: 10px; background:#fff; border:1px solid var(--border); border-radius: 12px; overflow:hidden; }
+    th, td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
+    th { text-align:left; background:#f8fafc; font-weight: 800; }
+    tr:last-child td { border-bottom: none; }
+    .tag { display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:#fff; font-size:12px; font-weight:800; }
+    .tag.ok { border-color:#16a34a; color:#166534; background:#f0fdf4; }
+    .tag.bad { border-color:#ef4444; color:#7f1d1d; background:#fef2f2; }
+    .tag.na  { border-color:#9ca3af; color:#374151; background:#f9fafb; }
   </style>
 </head>
 
@@ -177,7 +187,9 @@
 
     <div class="casebox">
       <div class="kv"><b id="caseHeader">Case —</b></div>
-      <div id="caseText" class="note"></div>
+
+      <!-- Table view (instead of narrative) -->
+      <div id="caseTableWrap"></div>
 
       <div class="divider"></div>
 
@@ -237,7 +249,7 @@
         </div>
 
         <div class="small" style="margin-top:8px;">
-          Phase 2/3: Blue marker shows AI reintubation-risk (%) on this same scale. Red marker shows threshold (e.g., 0.5 = 50%).
+          Phase 2/3: Blue marker shows AI reintubation-risk (%) on this scale. Red marker shows threshold (e.g., 0.5 = 50%).
         </div>
       </div>
 
@@ -271,7 +283,7 @@ const ACCESS_KEY = "19229432-4e38-4b7c-a6f1-0af4daa22ed2";
 const DEFAULT_THR = 0.5;
 const DEFAULT_TRAIN_URL = "https://www.dropbox.com/scl/fi/tue9k0lyb26zpaycjxy25/slides-draft.pdf?rlkey=7z9qjtbhch5ffgcff8g0wngwx&dl=0";
 
-// IMPORTANT: avoid “hang forever”
+// Avoid “hang forever”
 const SUBMIT_TIMEOUT_MS = 12000;
 
 const PHASE0_IDS = [29208, 8546];
@@ -308,10 +320,6 @@ function fmtHours(h){
   if (x < 24) return `${x.toFixed(1)} h`;
   return `${(x/24).toFixed(1)} days`;
 }
-function fmtDate(iso){
-  try { const d = new Date(iso); if (isNaN(d.getTime())) return "—"; return d.toISOString().slice(0,10); }
-  catch(e){ return "—"; }
-}
 function getParams(){
   const p = new URLSearchParams(window.location.search);
   return { thr: p.get("thr") || "", train: p.get("train") || "", admin: p.get("admin") || "" };
@@ -330,23 +338,79 @@ function getTrainingURL(){
   if (u !== "") return u;
   return DEFAULT_TRAIN_URL;
 }
-function buildCaseNarrative(c){
-  const lines = [];
-  lines.push(`Patient: ${c.age}-year-old ${c.sex} (${c.race}).`);
-  lines.push(`Snapshot: HR category ${c.HR_cat} bpm; ${fmtBool01(c.RR_gt20, "RR > 20/min", "RR ≤ 20/min")}; arterial pH ${c.pH_cat}; ${fmtBool01(c.PF_lt300, "PaO₂/FiO₂ < 300", "PaO₂/Fi₂ ≥ 300")}.`.replace("Fi₂","FiO₂"));
-  lines.push(`${fmtBool01(c.Hypercapnia, "Hypercapnia present", "No hypercapnia noted")}; MAP category ${c.MAP_cat} mmHg; ${fmtBool01(c.RSBI_gt105, "RSBI > 105", "RSBI ≤ 105")}; qSOFA = ${c.qsofa}.`);
-  lines.push(`Mechanical ventilation duration: ${fmtHours(c.MV_duration_h)}; ICU LOS so far: ${fmtHours(c.ICU_LOS_h)}.`);
-  lines.push(`Assume this information is the most recent pre-extubation status.`);
-  return lines.join(" ");
-}
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
 
-// UPDATED: binary aligns to reintubation question, uses threshold for yes/no
+// Binary label aligns to reintubation question, uses threshold for yes/no (Group 2)
 function aiBinaryLabel(risk, thr){
   if (!isFinite(risk) || !isFinite(thr)) return "—";
   return (risk >= thr)
     ? "Yes (will require reintubation within 48 hours)"
     : "No (will NOT require reintubation within 48 hours)";
+}
+
+/* ===========================
+   PATIENT TABLE (match Group 0)
+   - NOTE: We intentionally DO NOT show:
+     1) Observed outcome label
+     2) ICU admission time
+     3) Extubation time
+   =========================== */
+function tagHtml(kind){
+  if (kind === "PASS") return '<span class="tag ok">PASS</span>';
+  if (kind === "FAIL") return '<span class="tag bad">FAIL</span>';
+  return '<span class="tag na">Not available</span>';
+}
+function computeChecks(c){
+  const los = Number(c?.ICU_LOS_h);
+  const mv  = Number(c?.MV_duration_h);
+  let losGtMv = null;
+  if (isFinite(los) && isFinite(mv)) losGtMv = (los > mv);
+  return { losGtMv };
+}
+function buildCaseTableHTML(c){
+  if (!c) return '<div class="note">Error: case data not found.</div>';
+
+  const checks = computeChecks(c);
+  const losGtMvTag =
+    (checks.losGtMv === null) ? '<span class="tag na">Unknown</span>' :
+    (checks.losGtMv ? tagHtml("PASS") : tagHtml("FAIL"));
+
+  const rrLine   = fmtBool01(c.RR_gt20, ">20", "≤20");
+  const pfLine   = fmtBool01(c.PF_lt300, "<300", "≥300");
+  const hypLine  = fmtBool01(c.Hypercapnia, "Yes", "No");
+  const rsbiLine = (c.RSBI_gt105 === undefined) ? "—" : fmtBool01(c.RSBI_gt105, ">105", "≤105");
+  const qsofaLine = (c.qsofa ?? "—");
+
+  return `
+    <table aria-label="Case data table">
+      <tr><th colspan="2">Patient demographics</th></tr>
+      <tr><td>Age</td><td>${c.age ?? "—"}</td></tr>
+      <tr><td>Sex</td><td>${c.sex ?? "—"}</td></tr>
+      <tr><td>Race</td><td>${c.race ?? "—"}</td></tr>
+
+      <tr><th colspan="2">Pre-extubation snapshot variables</th></tr>
+      <tr><td>HR category</td><td>${c.HR_cat ?? "—"}</td></tr>
+      <tr><td>RR</td><td>${rrLine}</td></tr>
+      <tr><td>Arterial pH</td><td>${c.pH_cat ?? "—"}</td></tr>
+      <tr><td>PaO₂/FiO₂</td><td>${pfLine}</td></tr>
+      <tr><td>Hypercapnia</td><td>${hypLine}</td></tr>
+      <tr><td>MAP category</td><td>${c.MAP_cat ?? "—"}</td></tr>
+      <tr><td>RSBI</td><td>${rsbiLine}</td></tr>
+      <tr><td>qSOFA</td><td>${qsofaLine}</td></tr>
+
+      <tr><th colspan="2">Durations</th></tr>
+      <tr><td>Mechanical ventilation duration</td><td>${fmtHours(c.MV_duration_h)}</td></tr>
+      <tr><td>ICU LOS (so far)</td><td>${fmtHours(c.ICU_LOS_h)}</td></tr>
+
+      <tr><th colspan="2">Eligibility checks (requirements)</th></tr>
+      <tr><td>LOS &gt; MV duration</td><td>${losGtMvTag}</td></tr>
+
+      <tr><th colspan="2">Other extubation criteria (availability)</th></tr>
+      <tr><td>Norepinephrine &lt; 0.05 mcg/kg/min at extubation</td><td>${tagHtml("NA")}</td></tr>
+      <tr><td>Chest tube drainage &lt; 100 mL/h</td><td>${tagHtml("NA")}</td></tr>
+      <tr><td>RASS between −1 and +1</td><td>${tagHtml("NA")}</td></tr>
+    </table>
+  `;
 }
 
 /* ===========================
@@ -482,7 +546,7 @@ function renderCurrentCase(){
 
   if (!c){
     $("caseHeader").textContent = "Case —";
-    $("caseText").textContent = "Error: case data not found.";
+    $("caseTableWrap").innerHTML = '<div class="note">Error: case data not found.</div>';
     $("aiSupportBinary").textContent = "—";
     $("aiPanel").classList.add("hidden");
     $("aiReadout").textContent = "AI: —";
@@ -491,7 +555,7 @@ function renderCurrentCase(){
   }
 
   $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
-  $("caseText").textContent = buildCaseNarrative(c);
+  $("caseTableWrap").innerHTML = buildCaseTableHTML(c);
 
   const risk = Number(c.pred_score);
   const thr = state.threshold;
@@ -634,6 +698,7 @@ async function handleCaseSubmit(isSkip){
     time_seconds
   };
 
+  // send raw case fields too (same as your prior version)
   if (c){
     Object.assign(payload, {
       age: c.age, sex: c.sex, race: c.race,
