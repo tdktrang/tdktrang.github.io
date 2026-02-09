@@ -174,22 +174,65 @@
    =========================== */
 const ACCESS_KEY = "59ec2291-24b9-4a2d-85ef-f51d698ca7fe";
 
-/* Keep your phase IDs as-is */
-const PHASE0_IDS = [29208];
-const PHASE1_IDS = [29208];
-const PHASE2_IDS = [30190];
-const PHASE3_IDS = [25151];
+/* New patient set (from your table). Same case pool used across phases. */
+const ALL_CASE_IDS = [
+  28,67,89,94,158,215,218,278,279,285,296,301,341,378,438,459,494,498,608,728,795,830,839,859,920,945,1009,1045,1092,1095,1101,1171,1205,1235,1291,1321,1335
+];
+
+const PHASE0_IDS = ALL_CASE_IDS.slice();
+const PHASE1_IDS = ALL_CASE_IDS.slice();
+const PHASE2_IDS = ALL_CASE_IDS.slice();
+const PHASE3_IDS = ALL_CASE_IDS.slice();
 
 /*
-  IMPORTANT:
-  If you want ICU>=4h after ICU admission to be checked inside the survey page,
-  you must include ICU_to_extub_h in each CASE record (hours from ICU admission to extub decision).
-  Otherwise it will show as "—" and check will be "Unknown".
+  CASE RECORD FIELDS (now using your “before hour” snapshot fields):
+  - ICU_LOS_h
+  - MV_duration_h (from MV_duration_h_used)
+  - icuAdmission / extubation_time (strings)
+  - ICU_to_extub_h
+  - FiO2_used, pH_used, PaO2_used
+  - MAP, SBP, DBP, GCS, qSOFA
+  - failure / group (Success/Failure)
+  NOTE: pred_score not provided here; AI will show “Not available” in phases 1–3 unless you add it.
 */
 const CASES = {
-  29208: {"encounterId":29208,"t_decision":"2012-08-03T15:27:00Z","age":63,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":1118.3941666666667,"pred_score":0.99874},
-  30190: {"encounterId":30190,"t_decision":"2013-03-15T22:44:00Z","age":77,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":64.26611111111112,"pred_score":0.542402},
-  25151: {"encounterId":25151,"t_decision":"2013-11-23T09:43:00Z","age":72,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":59.326388888888886,"pred_score":0.285443}
+  28:   {"encounterId":28,"failure":0,"group":"Success","ICU_LOS_h":72.63861111,"MV_duration_h":7.5,"LOS_gt_MV":1,"icuAdmission":"12/19/2011 16:19","extubation_time":"12/20/2011 7:00","ICU_to_extub_h":14.68055556,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.37,"pH_in_7_35_7_45":1,"PaO2_used":189.2,"PaO2_gt_60":1,"MAP":84,"SBP":145,"DBP":72,"GCS":15,"qsofa":1},
+  67:   {"encounterId":67,"failure":0,"group":"Success","ICU_LOS_h":205.1905556,"MV_duration_h":36.41666667,"LOS_gt_MV":1,"icuAdmission":"6/30/2010 3:33","extubation_time":"7/1/2010 16:00","ICU_to_extub_h":36.44944444,"ICU_to_extub_ge4h":1,"FiO2_used":0.3,"FiO2_le_0_4":1,"pH_used":7.39,"pH_in_7_35_7_45":1,"PaO2_used":41.9,"PaO2_gt_60":0,"MAP":74,"SBP":110,"DBP":56,"GCS":15,"qsofa":0},
+  89:   {"encounterId":89,"failure":1,"group":"Failure","ICU_LOS_h":196.1819444,"MV_duration_h":11.25,"LOS_gt_MV":1,"icuAdmission":"10/30/2011 10:31","extubation_time":"10/31/2011 2:15","ICU_to_extub_h":15.73305556,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.32,"pH_in_7_35_7_45":0,"PaO2_used":112.6,"PaO2_gt_60":1,"MAP":77,"SBP":114,"DBP":63,"GCS":10,"qsofa":1},
+  94:   {"encounterId":94,"failure":0,"group":"Success","ICU_LOS_h":122.9533333,"MV_duration_h":19,"LOS_gt_MV":1,"icuAdmission":"6/27/2011 14:23","extubation_time":"6/28/2011 9:00","ICU_to_extub_h":18.60972222,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.4,"pH_in_7_35_7_45":1,"PaO2_used":153.1,"PaO2_gt_60":1,"MAP":71,"SBP":92,"DBP":58,"GCS":11,"qsofa":2},
+  158:  {"encounterId":158,"failure":0,"group":"Success","ICU_LOS_h":50.39,"MV_duration_h":14.5,"LOS_gt_MV":1,"icuAdmission":"12/20/2011 14:38","extubation_time":"12/21/2011 8:30","ICU_to_extub_h":17.85833333,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":165.6,"PaO2_gt_60":1,"MAP":68,"SBP":100,"DBP":53,"GCS":11,"qsofa":2},
+  215:  {"encounterId":215,"failure":0,"group":"Success","ICU_LOS_h":101.7827778,"MV_duration_h":6.25,"LOS_gt_MV":1,"icuAdmission":"8/30/2011 9:57","extubation_time":"8/31/2011 19:30","ICU_to_extub_h":33.53527778,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.39,"pH_in_7_35_7_45":1,"PaO2_used":141,"PaO2_gt_60":1,"MAP":81,"SBP":121,"DBP":65,"GCS":10,"qsofa":2},
+  218:  {"encounterId":218,"failure":0,"group":"Success","ICU_LOS_h":70.3175,"MV_duration_h":11.5,"LOS_gt_MV":1,"icuAdmission":"4/13/2011 16:51","extubation_time":"4/14/2011 7:15","ICU_to_extub_h":14.38611111,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.31,"pH_in_7_35_7_45":0,"PaO2_used":197.6,"PaO2_gt_60":1,"MAP":66,"SBP":96,"DBP":46,"GCS":11,"qsofa":2},
+  278:  {"encounterId":278,"failure":0,"group":"Success","ICU_LOS_h":123.7097222,"MV_duration_h":19,"LOS_gt_MV":1,"icuAdmission":"8/6/2010 15:49","extubation_time":"8/8/2010 10:00","ICU_to_extub_h":42.17388889,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.39,"pH_in_7_35_7_45":1,"PaO2_used":143.7,"PaO2_gt_60":1,"MAP":66,"SBP":100,"DBP":52,"GCS":15,"qsofa":1},
+  279:  {"encounterId":279,"failure":1,"group":"Failure","ICU_LOS_h":263.4694444,"MV_duration_h":151.15,"LOS_gt_MV":1,"icuAdmission":"4/22/2010 16:13","extubation_time":"4/29/2010 9:39","ICU_to_extub_h":161.4308333,"ICU_to_extub_ge4h":1,"FiO2_used":0.5,"FiO2_le_0_4":0,"pH_used":7.47,"pH_in_7_35_7_45":0,"PaO2_used":76.2,"PaO2_gt_60":1,"MAP":76,"SBP":130,"DBP":54,"GCS":9,"qsofa":1},
+  285:  {"encounterId":285,"failure":0,"group":"Success","ICU_LOS_h":51.03583333,"MV_duration_h":8.5,"LOS_gt_MV":1,"icuAdmission":"11/9/2010 9:45","extubation_time":"11/9/2010 23:00","ICU_to_extub_h":13.23416667,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":111.6,"PaO2_gt_60":1,"MAP":77,"SBP":115,"DBP":63,"GCS":9,"qsofa":1},
+  296:  {"encounterId":296,"failure":0,"group":"Success","ICU_LOS_h":80.09638889,"MV_duration_h":7,"LOS_gt_MV":1,"icuAdmission":"11/1/2011 10:06","extubation_time":"11/1/2011 20:30","ICU_to_extub_h":10.39888889,"ICU_to_extub_ge4h":1,"FiO2_used":0.25,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":85.4,"PaO2_gt_60":1,"MAP":63,"SBP":94,"DBP":50,"GCS":15,"qsofa":1},
+  301:  {"encounterId":301,"failure":0,"group":"Success","ICU_LOS_h":50.99472222,"MV_duration_h":17.35,"LOS_gt_MV":1,"icuAdmission":"12/15/2010 11:27","extubation_time":"12/16/2010 8:21","ICU_to_extub_h":20.88583333,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.32,"pH_in_7_35_7_45":0,"PaO2_used":162.8,"PaO2_gt_60":1,"MAP":71,"SBP":89,"DBP":53,"GCS":11,"qsofa":2},
+  341:  {"encounterId":341,"failure":0,"group":"Success","ICU_LOS_h":70.55638889,"MV_duration_h":7.25,"LOS_gt_MV":1,"icuAdmission":"8/27/2010 18:00","extubation_time":"8/28/2010 13:00","ICU_to_extub_h":18.98444444,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.34,"pH_in_7_35_7_45":0,"PaO2_used":197.4,"PaO2_gt_60":1,"MAP":71,"SBP":117,"DBP":36,"GCS":15,"qsofa":0},
+  378:  {"encounterId":378,"failure":0,"group":"Success","ICU_LOS_h":59.19222222,"MV_duration_h":7.5,"LOS_gt_MV":1,"icuAdmission":"11/8/2010 8:49","extubation_time":"11/8/2010 21:00","ICU_to_extub_h":12.17694444,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":117.5,"PaO2_gt_60":1,"MAP":77,"SBP":96,"DBP":64,"GCS":11,"qsofa":2},
+  438:  {"encounterId":438,"failure":0,"group":"Success","ICU_LOS_h":73.11305556,"MV_duration_h":17,"LOS_gt_MV":1,"icuAdmission":"4/15/2011 17:56","extubation_time":"4/16/2011 12:30","ICU_to_extub_h":18.56,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.48,"pH_in_7_35_7_45":0,"PaO2_used":202.7,"PaO2_gt_60":1,"MAP":95,"SBP":126,"DBP":71,"GCS":10,"qsofa":1},
+  459:  {"encounterId":459,"failure":0,"group":"Success","ICU_LOS_h":26.92722222,"MV_duration_h":2.25,"LOS_gt_MV":1,"icuAdmission":"6/15/2011 16:36","extubation_time":"6/15/2011 21:15","ICU_to_extub_h":4.646388889,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.4,"pH_in_7_35_7_45":1,"PaO2_used":137.8,"PaO2_gt_60":1,"MAP":82,"SBP":155,"DBP":61,"GCS":3,"qsofa":1},
+  494:  {"encounterId":494,"failure":0,"group":"Success","ICU_LOS_h":97.16777778,"MV_duration_h":6.75,"LOS_gt_MV":1,"icuAdmission":"3/18/2011 21:08","extubation_time":"3/19/2011 21:30","ICU_to_extub_h":24.3525,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.42,"pH_in_7_35_7_45":1,"PaO2_used":325.8,"PaO2_gt_60":1,"MAP":98,"SBP":166,"DBP":60,"GCS":11,"qsofa":1},
+  498:  {"encounterId":498,"failure":0,"group":"Success","ICU_LOS_h":51.78361111,"MV_duration_h":7.916666667,"LOS_gt_MV":1,"icuAdmission":"10/20/2010 10:58","extubation_time":"10/20/2010 20:25","ICU_to_extub_h":9.447222222,"ICU_to_extub_ge4h":1,"FiO2_used":0.5,"FiO2_le_0_4":0,"pH_used":7.39,"pH_in_7_35_7_45":1,"PaO2_used":117.6,"PaO2_gt_60":1,"MAP":73,"SBP":106,"DBP":56,"GCS":14,"qsofa":1},
+  608:  {"encounterId":608,"failure":0,"group":"Success","ICU_LOS_h":54.85611111,"MV_duration_h":14.5,"LOS_gt_MV":1,"icuAdmission":"8/1/2011 15:14","extubation_time":"8/2/2011 8:00","ICU_to_extub_h":16.75527778,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.35,"pH_in_7_35_7_45":1,"PaO2_used":35.6,"PaO2_gt_60":0,"MAP":64,"SBP":84,"DBP":47,"GCS":15,"qsofa":2},
+  728:  {"encounterId":728,"failure":0,"group":"Success","ICU_LOS_h":52.76722222,"MV_duration_h":6.5,"LOS_gt_MV":1,"icuAdmission":"2/17/2011 10:00","extubation_time":"2/17/2011 21:15","ICU_to_extub_h":11.24861111,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.38,"pH_in_7_35_7_45":1,"PaO2_used":111.1,"PaO2_gt_60":1,"MAP":72,"SBP":114,"DBP":56,"GCS":14,"qsofa":2},
+  795:  {"encounterId":795,"failure":0,"group":"Success","ICU_LOS_h":49.57444444,"MV_duration_h":8.5,"LOS_gt_MV":1,"icuAdmission":"11/12/2010 10:48","extubation_time":"11/12/2010 21:00","ICU_to_extub_h":10.18472222,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.43,"pH_in_7_35_7_45":1,"PaO2_used":190.3,"PaO2_gt_60":1,"MAP":61,"SBP":120,"DBP":80,"GCS":11,"qsofa":2},
+  830:  {"encounterId":830,"failure":0,"group":"Success","ICU_LOS_h":44.94027778,"MV_duration_h":10.33333333,"LOS_gt_MV":1,"icuAdmission":"2/2/2012 15:06","extubation_time":"2/3/2012 8:20","ICU_to_extub_h":17.22388889,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.43,"pH_in_7_35_7_45":1,"PaO2_used":112.6,"PaO2_gt_60":1,"MAP":78,"SBP":108,"DBP":60,"GCS":15,"qsofa":0},
+  839:  {"encounterId":839,"failure":1,"group":"Failure","ICU_LOS_h":317.5644444,"MV_duration_h":8,"LOS_gt_MV":1,"icuAdmission":"5/20/2010 17:38","extubation_time":"5/22/2010 23:00","ICU_to_extub_h":53.35416667,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.38,"pH_in_7_35_7_45":1,"PaO2_used":32.9,"PaO2_gt_60":0,"MAP":72,"SBP":107,"DBP":41,"GCS":15,"qsofa":1},
+  859:  {"encounterId":859,"failure":1,"group":"Failure","ICU_LOS_h":100.3641667,"MV_duration_h":25.75,"LOS_gt_MV":1,"icuAdmission":"1/17/2011 11:54","extubation_time":"1/18/2011 16:15","ICU_to_extub_h":28.34805556,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.32,"pH_in_7_35_7_45":0,"PaO2_used":116,"PaO2_gt_60":1,"MAP":99,"SBP":158,"DBP":66,"GCS":8,"qsofa":1},
+  920:  {"encounterId":920,"failure":0,"group":"Success","ICU_LOS_h":110.1111111,"MV_duration_h":17.03333333,"LOS_gt_MV":1,"icuAdmission":"4/6/2012 2:41","extubation_time":"4/7/2012 7:17","ICU_to_extub_h":28.59583333,"ICU_to_extub_ge4h":1,"FiO2_used":0.3,"FiO2_le_0_4":1,"pH_used":7.44,"pH_in_7_35_7_45":1,"PaO2_used":76.5,"PaO2_gt_60":1,"MAP":86,"SBP":128,"DBP":62,"GCS":11,"qsofa":1},
+  945:  {"encounterId":945,"failure":0,"group":"Success","ICU_LOS_h":71.52916667,"MV_duration_h":11,"LOS_gt_MV":1,"icuAdmission":"7/30/2010 17:25","extubation_time":"7/31/2010 7:00","ICU_to_extub_h":13.57333333,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":104.3,"PaO2_gt_60":1,"MAP":85,"SBP":121,"DBP":70,"GCS":11,"qsofa":2},
+  1009: {"encounterId":1009,"failure":0,"group":"Success","ICU_LOS_h":55.84472222,"MV_duration_h":5.25,"LOS_gt_MV":1,"icuAdmission":"6/21/2011 9:14","extubation_time":"6/21/2011 19:00","ICU_to_extub_h":9.766666667,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":155.7,"PaO2_gt_60":1,"MAP":73,"SBP":99,"DBP":59,"GCS":10,"qsofa":2},
+  1045: {"encounterId":1045,"failure":0,"group":"Success","ICU_LOS_h":73.70583333,"MV_duration_h":10.83333333,"LOS_gt_MV":1,"icuAdmission":"1/20/2012 14:05","extubation_time":"1/21/2012 7:00","ICU_to_extub_h":16.90166667,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":128.3,"PaO2_gt_60":1,"MAP":70,"SBP":106,"DBP":46,"GCS":10,"qsofa":1},
+  1092: {"encounterId":1092,"failure":0,"group":"Success","ICU_LOS_h":50.34916667,"MV_duration_h":7.083333333,"LOS_gt_MV":1,"icuAdmission":"3/18/2011 12:37","extubation_time":"3/18/2011 20:30","ICU_to_extub_h":7.8775,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":146.4,"PaO2_gt_60":1,"MAP":83,"SBP":112,"DBP":66,"GCS":11,"qsofa":1},
+  1095: {"encounterId":1095,"failure":0,"group":"Success","ICU_LOS_h":49.91916667,"MV_duration_h":9.666666667,"LOS_gt_MV":1,"icuAdmission":"6/28/2011 16:01","extubation_time":"6/29/2011 6:40","ICU_to_extub_h":14.63805556,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.43,"pH_in_7_35_7_45":1,"PaO2_used":123.8,"PaO2_gt_60":1,"MAP":82,"SBP":116,"DBP":63,"GCS":11,"qsofa":1},
+  1101: {"encounterId":1101,"failure":0,"group":"Success","ICU_LOS_h":71.36361111,"MV_duration_h":6.866666667,"LOS_gt_MV":1,"icuAdmission":"7/8/2011 16:04","extubation_time":"7/9/2011 7:20","ICU_to_extub_h":15.26361111,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.39,"pH_in_7_35_7_45":1,"PaO2_used":94.6,"PaO2_gt_60":1,"MAP":69,"SBP":104,"DBP":55,"GCS":10,"qsofa":1},
+  1171: {"encounterId":1171,"failure":0,"group":"Success","ICU_LOS_h":54.69388889,"MV_duration_h":9.5,"LOS_gt_MV":1,"icuAdmission":"2/22/2011 9:51","extubation_time":"2/22/2011 23:00","ICU_to_extub_h":13.13888889,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.48,"pH_in_7_35_7_45":0,"PaO2_used":201.6,"PaO2_gt_60":1,"MAP":98,"SBP":157,"DBP":69,"GCS":10,"qsofa":1},
+  1205: {"encounterId":1205,"failure":0,"group":"Success","ICU_LOS_h":118.4961111,"MV_duration_h":8.583333333,"LOS_gt_MV":1,"icuAdmission":"11/17/2011 14:59","extubation_time":"11/18/2011 7:10","ICU_to_extub_h":16.17277778,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.37,"pH_in_7_35_7_45":1,"PaO2_used":110.6,"PaO2_gt_60":1,"MAP":66,"SBP":101,"DBP":51,"GCS":3,"qsofa":1},
+  1235: {"encounterId":1235,"failure":0,"group":"Success","ICU_LOS_h":57.11888889,"MV_duration_h":7,"LOS_gt_MV":1,"icuAdmission":"12/5/2011 11:48","extubation_time":"12/5/2011 18:50","ICU_to_extub_h":7.031111111,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.37,"pH_in_7_35_7_45":1,"PaO2_used":141.6,"PaO2_gt_60":1,"MAP":60,"SBP":120,"DBP":44,"GCS":3,"qsofa":1},
+  1291: {"encounterId":1291,"failure":0,"group":"Success","ICU_LOS_h":53.9775,"MV_duration_h":7,"LOS_gt_MV":1,"icuAdmission":"1/10/2011 9:49","extubation_time":"1/10/2011 22:00","ICU_to_extub_h":12.16694444,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.41,"pH_in_7_35_7_45":1,"PaO2_used":139.6,"PaO2_gt_60":1,"MAP":67,"SBP":96,"DBP":48,"GCS":10,"qsofa":2},
+  1321: {"encounterId":1321,"failure":0,"group":"Success","ICU_LOS_h":53.78555556,"MV_duration_h":7.75,"LOS_gt_MV":1,"icuAdmission":"1/30/2012 10:39","extubation_time":"1/30/2012 20:45","ICU_to_extub_h":10.08472222,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.35,"pH_in_7_35_7_45":1,"PaO2_used":163.1,"PaO2_gt_60":1,"MAP":95,"SBP":136,"DBP":73,"GCS":15,"qsofa":0},
+  1335: {"encounterId":1335,"failure":0,"group":"Success","ICU_LOS_h":52.15277778,"MV_duration_h":5.75,"LOS_gt_MV":1,"icuAdmission":"2/26/2011 11:44","extubation_time":"2/26/2011 21:45","ICU_to_extub_h":10.00166667,"ICU_to_extub_ge4h":1,"FiO2_used":0.4,"FiO2_le_0_4":1,"pH_used":7.45,"pH_in_7_35_7_45":1,"PaO2_used":115.4,"PaO2_gt_60":1,"MAP":90,"SBP":144,"DBP":76,"GCS":10,"qsofa":1}
 };
 
 /* ===========================
@@ -205,17 +248,21 @@ function shuffle(arr){
   }
   return a;
 }
-function fmtBool01(v, yesTxt, noTxt){ return (Number(v) === 1) ? yesTxt : noTxt; }
 function fmtHours(h){
   if (h === null || h === undefined || isNaN(h)) return "—";
   const x = Number(h);
   if (x < 24) return `${x.toFixed(1)} h`;
   return `${(x/24).toFixed(1)} days`;
 }
+function fmtNum(v, digits=2){
+  if (v === null || v === undefined || v === "" || !isFinite(Number(v))) return "—";
+  const x = Number(v);
+  return (digits === null) ? String(x) : x.toFixed(digits);
+}
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
 
 function aiBinaryLabelReintub(risk){
-  if (!isFinite(risk)) return "—";
+  if (!isFinite(risk)) return "Not available";
   return (risk >= 0.5)
     ? "Yes (will require reintubation within 48 hours)"
     : "No (will NOT require reintubation within 48 hours)";
@@ -237,11 +284,7 @@ function computeChecks(c){
   let icuGe4 = null;
   if (isFinite(icuToExt)) icuGe4 = (icuToExt >= 4);
 
-  return {
-    losGtMv,
-    icuToExt,
-    icuGe4
-  };
+  return { losGtMv, icuToExt, icuGe4 };
 }
 
 function buildCaseTableHTML(c){
@@ -255,33 +298,32 @@ function buildCaseTableHTML(c){
   const losGtMvTag = (losGtMvStatus === "PASS") ? tagHtml("PASS") : (losGtMvStatus === "FAIL" ? tagHtml("FAIL") : tagHtml("UNKNOWN"));
   const icuGe4Tag  = (icuGe4Status  === "PASS") ? tagHtml("PASS") : (icuGe4Status  === "FAIL" ? tagHtml("FAIL") : tagHtml("UNKNOWN"));
 
-  const hrLine = (c.HR_cat ?? "—");
-  const rrLine = fmtBool01(c.RR_gt20, ">20", "≤20");
-  const phLine = (c.pH_cat ?? "—");
-  const pfLine = fmtBool01(c.PF_lt300, "<300", "≥300");
-  const hypLine = fmtBool01(c.Hypercapnia, "Yes", "No");
-  const mapLine = (c.MAP_cat ?? "—");
-  const rsbiLine = (c.RSBI_gt105 === undefined) ? "—" : fmtBool01(c.RSBI_gt105, ">105", "≤105");
-  const qsofaLine = (c.qsofa ?? "—");
-
   const icuToExtStr = isFinite(checks.icuToExt) ? fmtHours(checks.icuToExt) : "—";
+
+  const fio2 = fmtNum(c.FiO2_used, 2);
+  const ph   = fmtNum(c.pH_used, 2);
+  const pao2 = fmtNum(c.PaO2_used, 1);
+
+  const outcome = (String(c.group || "").toLowerCase() === "failure" || Number(c.failure) === 1)
+    ? '<span class="tag bad">Failure</span>'
+    : '<span class="tag ok">Success</span>';
 
   return `
     <table aria-label="Case data table">
-      <tr><th colspan="2">Patient demographics</th></tr>
-      <tr><td>Age</td><td>${c.age ?? "—"}</td></tr>
-      <tr><td>Sex</td><td>${c.sex ?? "—"}</td></tr>
-      <tr><td>Race</td><td>${c.race ?? "—"}</td></tr>
+      <tr><th colspan="2">Case overview</th></tr>
+      <tr><td>Observed outcome label (hidden to participant in analysis)</td><td>${outcome}</td></tr>
+      <tr><td>ICU admission time</td><td>${c.icuAdmission ?? "—"}</td></tr>
+      <tr><td>Extubation time</td><td>${c.extubation_time ?? "—"}</td></tr>
 
-      <tr><th colspan="2">Pre-extubation snapshot variables</th></tr>
-      <tr><td>HR category</td><td>${hrLine}</td></tr>
-      <tr><td>RR</td><td>${rrLine}</td></tr>
-      <tr><td>Arterial pH</td><td>${phLine}</td></tr>
-      <tr><td>PaO₂/FiO₂</td><td>${pfLine}</td></tr>
-      <tr><td>Hypercapnia</td><td>${hypLine}</td></tr>
-      <tr><td>MAP category</td><td>${mapLine}</td></tr>
-      <tr><td>RSBI</td><td>${rsbiLine}</td></tr>
-      <tr><td>qSOFA</td><td>${qsofaLine}</td></tr>
+      <tr><th colspan="2">Pre-extubation snapshot variables (available)</th></tr>
+      <tr><td>FiO₂</td><td>${fio2}</td></tr>
+      <tr><td>Arterial pH</td><td>${ph}</td></tr>
+      <tr><td>PaO₂</td><td>${pao2}</td></tr>
+      <tr><td>MAP</td><td>${c.MAP ?? "—"}</td></tr>
+      <tr><td>SBP</td><td>${c.SBP ?? "—"}</td></tr>
+      <tr><td>DBP</td><td>${c.DBP ?? "—"}</td></tr>
+      <tr><td>GCS</td><td>${c.GCS ?? "—"}</td></tr>
+      <tr><td>qSOFA</td><td>${c.qsofa ?? "—"}</td></tr>
 
       <tr><th colspan="2">Durations</th></tr>
       <tr><td>Mechanical ventilation duration</td><td>${fmtHours(c.MV_duration_h)}</td></tr>
@@ -292,10 +334,10 @@ function buildCaseTableHTML(c){
       <tr><td>LOS > MV duration</td><td>${losGtMvTag}</td></tr>
       <tr><td>ICU time ≥ 4h before extubation</td><td>${icuGe4Tag}</td></tr>
 
-      <tr><th colspan="2">Other extubation criteria (availability)</th></tr>
+      <tr><th colspan="2">Other extubation criteria (not in this dataset)</th></tr>
       <tr>
         <td>Norepinephrine &lt; 0.05 mcg/kg/min at extubation</td>
-        <td><span class="tag na">Not available</span> (only proxy: vasopressor use within 24h if provided)</td>
+        <td><span class="tag na">Not available</span></td>
       </tr>
       <tr>
         <td>Chest tube drainage &lt; 100 mL/h</td>
@@ -405,7 +447,7 @@ function renderCurrentCase(){
   $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
   $("caseTableWrap").innerHTML = buildCaseTableHTML(c);
 
-  const risk = Number(c.pred_score);
+  const risk = Number(c.pred_score); // likely missing -> NaN
   $("aiSupportBinary").textContent = (state.phase === 0) ? "None" : aiBinaryLabelReintub(risk);
 
   clearYesNo();
@@ -486,14 +528,17 @@ async function handleCaseSubmit(isSkip){
     doctor_id, specialty, years_exp, group_id,
     phase: state.phase,
     phase_case_index: state.idx + 1,
-    encounter_id: c ? c.encounterId : "",
-    t_decision: c ? c.t_decision : "",
 
+    encounter_id: c ? c.encounterId : "",
+    icuAdmission: c ? c.icuAdmission : "",
+    extubation_time: c ? c.extubation_time : "",
+
+    // AI fields (pred_score missing => binary label becomes "Not available")
     ai_support_present: (state.phase === 0) ? "no" : "yes",
     ai_support_type: (state.phase === 0) ? "none" : "binary_only",
     ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabelReintub(risk),
 
-    // Save requirement checks too
+    // Requirement checks
     LOS_gt_MV: (checks.losGtMv === null || checks.losGtMv === undefined) ? "" : (checks.losGtMv ? "1" : "0"),
     ICU_to_extub_h: (checks.icuToExt === null || checks.icuToExt === undefined || !isFinite(checks.icuToExt)) ? "" : String(checks.icuToExt),
     ICU_to_extub_ge4h: (checks.icuGe4 === null || checks.icuGe4 === undefined) ? "" : (checks.icuGe4 ? "1" : "0"),
@@ -505,11 +550,19 @@ async function handleCaseSubmit(isSkip){
 
   if (c){
     Object.assign(payload, {
-      age: c.age, sex: c.sex, race: c.race,
-      HR_cat: c.HR_cat, RR_gt20: c.RR_gt20, pH_cat: c.pH_cat, PF_lt300: c.PF_lt300,
-      Hypercapnia: c.Hypercapnia, MAP_cat: c.MAP_cat, RSBI_gt105: c.RSBI_gt105, qsofa: c.qsofa,
-      MV_duration_h: c.MV_duration_h, ICU_LOS_h: c.ICU_LOS_h,
-      pred_score: c.pred_score
+      // Keep your original “label” columns in the record (OK for analysis)
+      failure: c.failure,
+      group_label: c.group,
+
+      ICU_LOS_h: c.ICU_LOS_h,
+      MV_duration_h: c.MV_duration_h,
+
+      FiO2_used: c.FiO2_used,
+      pH_used: c.pH_used,
+      PaO2_used: c.PaO2_used,
+
+      MAP: c.MAP, SBP: c.SBP, DBP: c.DBP,
+      GCS: c.GCS, qSOFA: c.qsofa
     });
   }
 
