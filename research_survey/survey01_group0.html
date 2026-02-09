@@ -310,12 +310,8 @@ function buildCaseTableHTML(c){
 
   return `
     <table aria-label="Case data table">
-      <tr><th colspan="2">Case overview</th></tr>
-      <tr><td>Observed outcome label (hidden to participant in analysis)</td><td>${outcome}</td></tr>
-      <tr><td>ICU admission time</td><td>${c.icuAdmission ?? "—"}</td></tr>
-      <tr><td>Extubation time</td><td>${c.extubation_time ?? "—"}</td></tr>
-
       <tr><th colspan="2">Pre-extubation snapshot variables (available)</th></tr>
+      
       <tr><td>FiO₂</td><td>${fio2}</td></tr>
       <tr><td>Arterial pH</td><td>${ph}</td></tr>
       <tr><td>PaO₂</td><td>${pao2}</td></tr>
