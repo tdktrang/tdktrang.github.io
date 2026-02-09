@@ -80,7 +80,7 @@
     .ynChoice input { width:auto; margin:0; padding:0; }
     .questionBox { padding: 12px; border:1px solid var(--border); border-radius: 14px; background:#fff; margin-top: 12px; }
 
-    /* ===== Patient table (Group 0 style) ===== */
+    /* ===== Patient table (match Group 1/0 new style) ===== */
     table { width:100%; border-collapse: collapse; margin-top: 10px; background:#fff; border:1px solid var(--border); border-radius: 12px; overflow:hidden; }
     th, td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
     th { text-align:left; background:#f8fafc; font-weight: 800; }
@@ -283,13 +283,13 @@ const ACCESS_KEY = "19229432-4e38-4b7c-a6f1-0af4daa22ed2";
 const DEFAULT_THR = 0.5;
 const DEFAULT_TRAIN_URL = "https://www.dropbox.com/scl/fi/tue9k0lyb26zpaycjxy25/slides-draft.pdf?rlkey=7z9qjtbhch5ffgcff8g0wngwx&dl=0";
 
+/* ===== Added: guidelines link + “procedure PASS” row (match Group 1) ===== */
+const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.pdf"; // replace if needed
+
 // Avoid “hang forever”
 const SUBMIT_TIMEOUT_MS = 12000;
 
-/* ====== NEW PATIENTS (Group 2) ======
-   NOTE: You did NOT provide AI risk scores here.
-   pred_score is kept as null so the AI readout will show “—” until you fill it.
-*/
+/* ====== CASES (as provided) ====== */
 const CASES = {
   28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,        ICU_LOS_days:0.611689815, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:0.69 },
   67:  { encounterId:67,  Age:56, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:36.41666667, ICU_LOS_days:1.518726852, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
@@ -325,7 +325,7 @@ const CASES = {
   1045:{ encounterId:1045,Age:51, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:10.83333333, ICU_LOS_days:0.704236111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null }
 };
 
-/* Split 29 cases across phases (total 29 cases overall) */
+/* Phase IDs */
 const PHASE0_IDS = [28];
 const PHASE1_IDS = [278];
 const PHASE2_IDS = [438];
@@ -363,8 +363,9 @@ function getTrainingURL(){
   return DEFAULT_TRAIN_URL;
 }
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
+function safe(v){ return (v === null || v === undefined || v === "") ? "—" : String(v); }
 
-/* For Group 2, binary uses threshold */
+/* Binary uses threshold */
 function aiBinaryLabel(risk, thr){
   if (!isFinite(risk) || !isFinite(thr)) return "—";
   return (risk >= thr)
@@ -372,22 +373,25 @@ function aiBinaryLabel(risk, thr){
     : "No (will NOT require reintubation within 48 hours)";
 }
 
-/* ===========================
-   PATIENT TABLE (no outcome/admit/extubation fields)
-   =========================== */
 function tagHtml(kind){
   if (kind === "PASS") return '<span class="tag ok">PASS</span>';
   if (kind === "FAIL") return '<span class="tag bad">FAIL</span>';
   return '<span class="tag na">Not available</span>';
 }
-function safe(v){ return (v === null || v === undefined || v === "") ? "—" : String(v); }
+
+/* ===== MODIFIED PATIENT TABLE (match your new standard)
+   - Remove "Encounter" row (already in title)
+   - Remove "LOS > MV duration"
+   - Add ICU LOS hours row (uses c.ICU_LOS_hours if provided; otherwise shows "—")
+   - Add guideline procedure PASS row + link (like Group 1)
+*/
 function buildCaseTableHTML(c){
   if (!c) return '<div class="note">Error: case data not found.</div>';
+  const guideUrl = encodeURI(DEFAULT_GUIDELINES_URL);
 
   return `
     <table aria-label="Case data table">
       <tr><th colspan="2">Patient demographics</th></tr>
-      <tr><td>Encounter</td><td>${safe(c.encounterId)}</td></tr>
       <tr><td>Age</td><td>${safe(c.Age)}</td></tr>
       <tr><td>Sex</td><td>${safe(c.Sex)}</td></tr>
       <tr><td>Race</td><td>${safe(c.Race)}</td></tr>
@@ -405,15 +409,17 @@ function buildCaseTableHTML(c){
       <tr><th colspan="2">Durations</th></tr>
       <tr><td>Mechanical ventilation duration (h)</td><td>${safe(c.MV_duration_h)}</td></tr>
       <tr><td>ICU LOS (so far) (days)</td><td>${safe(c.ICU_LOS_days)}</td></tr>
+      <tr><td>ICU LOS (so far) (hours)</td><td>${safe(c.ICU_LOS_hours)}</td></tr>
 
       <tr><th colspan="2">Eligibility checks</th></tr>
       <tr><td>ICU time ≥ 4 hours</td><td>${tagHtml(c.ICU_time_ge4)}</td></tr>
-      <tr><td>LOS &gt; MV duration</td><td>${tagHtml(c.LOS_gt_MV)}</td></tr>
-
-      <tr><th colspan="2">Other extubation criteria (availability)</th></tr>
-      <tr><td>Norepinephrine &lt; 0.05 mcg/kg/min at extubation</td><td>${tagHtml("NA")}</td></tr>
-      <tr><td>Chest tube drainage &lt; 100 mL/h</td><td>${tagHtml("NA")}</td></tr>
-      <tr><td>RASS between −1 and +1</td><td>${tagHtml("NA")}</td></tr>
+      <tr>
+        <td>
+          CTICU guideline extubation procedure
+          <span class="small">(<a href="${guideUrl}" target="_blank" rel="noopener">formal guidelines</a>)</span>
+        </td>
+        <td>${tagHtml("PASS")}</td>
+      </tr>
     </table>
   `;
 }
@@ -562,7 +568,7 @@ function renderCurrentCase(){
   $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
   $("caseTableWrap").innerHTML = buildCaseTableHTML(c);
 
-  const risk = Number(c.pred_score);      // currently null -> NaN until you fill it
+  const risk = Number(c.pred_score); // can be null->NaN until you fill it
   const thr = state.threshold;
   const showProb = (state.phase === 2 || state.phase === 3);
 
@@ -692,17 +698,19 @@ async function handleCaseSubmit(isSkip){
 
     ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk, thr),
 
-    // AI risk of REINTUBATION within 48h (blank until pred_score exists)
     risk_score_shown: (showProb && c && isFinite(risk)) ? risk.toFixed(6) : "",
     risk_percent_shown: (showProb && c && isFinite(risk)) ? String(Math.round(risk*100)) : "",
     threshold_shown: (showProb && isFinite(thr)) ? thr.toFixed(6) : "",
+
+    // Added for your new “procedure PASS” + guideline link
+    CTICU_extubation_procedure: "PASS",
+    CTICU_guidelines_url: DEFAULT_GUIDELINES_URL,
 
     human_reintubation_prediction,
     rationale,
     time_seconds
   };
 
-  // Store the patient fields you provided
   if (c){
     Object.assign(payload, {
       Age: c.Age, Sex: c.Sex, Race: c.Race,
@@ -716,8 +724,8 @@ async function handleCaseSubmit(isSkip){
       qSOFA: c.qSOFA,
       MV_duration_h: c.MV_duration_h,
       ICU_LOS_days: c.ICU_LOS_days,
-      ICU_time_ge4: c.ICU_time_ge4,
-      LOS_gt_MV: c.LOS_gt_MV
+      ICU_LOS_hours: c.ICU_LOS_hours || "",
+      ICU_time_ge4: c.ICU_time_ge4
     });
   }
 
