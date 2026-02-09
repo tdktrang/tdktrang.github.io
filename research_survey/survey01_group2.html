@@ -371,12 +371,14 @@ function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).
 function safe(v){ return (v === null || v === undefined || v === "") ? "—" : String(v); }
 
 /* Binary uses threshold */
-function aiBinaryLabel(risk, thr){
-  if (!isFinite(risk) || !isFinite(thr)) return "—";
-  return (risk >= thr)
+function aiBinaryLabel(riskPct, thr){
+  if (!isFinite(riskPct) || !isFinite(thr)) return "—";
+  const thrPct = thr * 100;
+  return (riskPct >= thrPct)
     ? "Yes (will require reintubation within 48 hours)"
     : "No (will NOT require reintubation within 48 hours)";
 }
+
 
 function tagHtml(kind){
   if (kind === "PASS") return '<span class="tag ok">PASS</span>';
