@@ -174,28 +174,26 @@
    =========================== */
 const ACCESS_KEY = "59ec2291-24b9-4a2d-85ef-f51d698ca7fe";
 
-/* ====== GROUP 0 MODIFICATION (match Group 1/2) ======
-   - Use the SAME case pool (Group 2 schema & IDs)
-   - Use the SAME patient display style (demographics + snapshot + durations + eligibility checks)
-   - Keep Group 0 behavior: Phase 0 shows NO AI; Phases 1–3 show AI binary ONLY (if pred_score exists)
-   - Normalize pred_score if provided in 0–1 or 0–100
-*/
+/* Group 0 AI: Phase 0 none; Phase 1–3 binary only */
 const INTERNAL_BINARY_CUTOFF = 0.5;
 
-/* If you want Group 0 to use the same “one per phase” logic as Group 1/2, keep these.
-   If you want it to use ALL cases each phase, replace these arrays with ALL_CASE_IDS.slice().
-*/
+/* Phase case IDs */
 const PHASE0_IDS = [28];
 const PHASE1_IDS = [278];
 const PHASE2_IDS = [438];
 const PHASE3_IDS = [830];
 
-/* === SAME CASES AS GROUP 2 (paste the same CASES object here if you have more) === */
+/* ===== Guidelines link + always-PASS procedure (like Group 1) ===== */
+const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.pdf"; // replace if needed
+
+/* === Cases (you can paste your full CASES set here) ===
+   NOTE: now expects ICU_LOS_hours too if you have it; if not present, it shows "—".
+*/
 const CASES = {
-  28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,        ICU_LOS_days:0.611689815, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:69 },
-  278: { encounterId:278, Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:19,          ICU_LOS_days:1.75724537,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:58 },
-  438: { encounterId:438, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:">7.45",     PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17,          ICU_LOS_days:0.773333333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:60 },
-  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:39 }
+  28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,        ICU_LOS_days:0.611689815, ICU_LOS_hours:"—", ICU_time_ge4:"PASS", pred_score:69 },
+  278: { encounterId:278, Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:19,          ICU_LOS_days:1.75724537,  ICU_LOS_hours:"—", ICU_time_ge4:"PASS", pred_score:58 },
+  438: { encounterId:438, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:">7.45",     PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17,          ICU_LOS_days:0.773333333, ICU_LOS_hours:"—", ICU_time_ge4:"PASS", pred_score:60 },
+  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_LOS_hours:"—", ICU_time_ge4:"PASS", pred_score:39 }
 };
 
 /* ===========================
@@ -234,14 +232,21 @@ function tagHtml(kind){
   return '<span class="tag na">Not available</span>';
 }
 
-/* Patient table identical to Group 1/2 style */
+/* ===========================
+   PATIENT TABLE (MATCH GROUP 1)
+   - NO "Encounter" row (already in title)
+   - NO "LOS > MV duration"
+   - Includes ICU LOS days + hours
+   - Includes Eligibility checks: ICU time >=4h + Procedure PASS + guideline link
+   =========================== */
 function buildCaseTableHTML(c){
   if (!c) return '<div class="note">Error: case data not found.</div>';
+
+  const guideUrl = encodeURI(DEFAULT_GUIDELINES_URL);
 
   return `
     <table aria-label="Case data table">
       <tr><th colspan="2">Patient demographics</th></tr>
-      <tr><td>Encounter</td><td>${safe(c.encounterId)}</td></tr>
       <tr><td>Age</td><td>${safe(c.Age)}</td></tr>
       <tr><td>Sex</td><td>${safe(c.Sex)}</td></tr>
       <tr><td>Race</td><td>${safe(c.Race)}</td></tr>
@@ -259,21 +264,23 @@ function buildCaseTableHTML(c){
       <tr><th colspan="2">Durations</th></tr>
       <tr><td>Mechanical ventilation duration (h)</td><td>${safe(c.MV_duration_h)}</td></tr>
       <tr><td>ICU LOS (so far) (days)</td><td>${safe(c.ICU_LOS_days)}</td></tr>
+      <tr><td>ICU LOS (so far) (hours)</td><td>${safe(c.ICU_LOS_hours)}</td></tr>
 
       <tr><th colspan="2">Eligibility checks</th></tr>
       <tr><td>ICU time ≥ 4 hours</td><td>${tagHtml(c.ICU_time_ge4)}</td></tr>
-      <tr><td>LOS &gt; MV duration</td><td>${tagHtml(c.LOS_gt_MV)}</td></tr>
-
-      <tr><th colspan="2">Other extubation criteria (availability)</th></tr>
-      <tr><td>Norepinephrine &lt; 0.05 mcg/kg/min at extubation</td><td><span class="tag na">Not available</span></td></tr>
-      <tr><td>Chest tube drainage &lt; 100 mL/h</td><td><span class="tag na">Not available</span></td></tr>
-      <tr><td>RASS between −1 and +1</td><td><span class="tag na">Not available</span></td></tr>
+      <tr>
+        <td>
+          CTICU guideline extubation procedure
+          <span class="small">(<a href="${guideUrl}" target="_blank" rel="noopener">formal guidelines</a>)</span>
+        </td>
+        <td>${tagHtml("PASS")}</td>
+      </tr>
     </table>
   `;
 }
 
 /* ===========================
-   WEB3FORMS SUBMIT (JSON-only like Group 1)
+   WEB3FORMS SUBMIT
    =========================== */
 const SUBMIT_TIMEOUT_MS = 12000;
 
@@ -461,24 +468,16 @@ async function handleCaseSubmit(isSkip){
     phase_case_index: state.idx + 1,
     encounter_id: c ? c.encounterId : "",
 
-    // AI fields for Group 0:
-    // - Phase 0: none
-    // - Phase 1–3: binary only
     ai_support_present: (state.phase === 0) ? "no" : "yes",
     ai_support_type: (state.phase === 0) ? "none" : "binary_only",
     ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk),
-
-    // No probability/threshold in Group 0
-    risk_score_shown: "",
-    risk_percent_shown: "",
-    threshold_shown: "",
 
     human_reintubation_prediction,
     rationale,
     time_seconds
   };
 
-  // Keep same patient fields as Group 2/1 in your dataset output
+  // Patient fields (match Group 1 table)
   if (c){
     Object.assign(payload, {
       Age: c.Age, Sex: c.Sex, Race: c.Race,
@@ -492,8 +491,10 @@ async function handleCaseSubmit(isSkip){
       qSOFA: c.qSOFA,
       MV_duration_h: c.MV_duration_h,
       ICU_LOS_days: c.ICU_LOS_days,
+      ICU_LOS_hours: c.ICU_LOS_hours,
       ICU_time_ge4: c.ICU_time_ge4,
-      LOS_gt_MV: c.LOS_gt_MV
+      CTICU_extubation_procedure: "PASS",
+      CTICU_guidelines_url: DEFAULT_GUIDELINES_URL
     });
   }
 
