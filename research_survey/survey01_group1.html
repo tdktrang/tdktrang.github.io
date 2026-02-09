@@ -79,7 +79,7 @@
     .ynChoice input { width:auto; margin:0; padding:0; }
     .questionBox { padding: 12px; border:1px solid var(--border); border-radius: 14px; background:#fff; margin-top: 12px; }
 
-    /* ===== Tables (match Group 0) ===== */
+    /* ===== Patient table (same style as Group 2) ===== */
     table { width:100%; border-collapse: collapse; margin-top: 10px; background:#fff; border:1px solid var(--border); border-radius: 12px; overflow:hidden; }
     th, td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
     th { text-align:left; background:#f8fafc; font-weight: 800; }
@@ -188,7 +188,7 @@
     <div class="casebox">
       <div class="kv"><b id="caseHeader">Case —</b></div>
 
-      <!-- Table view (match Group 0) -->
+      <!-- Table view -->
       <div id="caseTableWrap"></div>
 
       <div class="divider"></div>
@@ -282,38 +282,50 @@ const DEFAULT_TRAIN_URL = "https://www.dropbox.com/scl/fi/tue9k0lyb26zpaycjxy25/
 // Internal cutoff for binary AI label (NOT shown to participants)
 const INTERNAL_BINARY_CUTOFF = 0.5;
 
-const PHASE0_IDS = [29208];
-const PHASE1_IDS = [29208];
-const PHASE2_IDS = [30190];
-const PHASE3_IDS = [25151];
+/* ====== USE THE SAME PATIENT SET AS GROUP 2 (schema + display) ======
+   This file expects cases to be in the "Group 2 style" schema:
+   { encounterId, Age, Sex, Race, HR_category, RR, Arterial_pH, PaO2_FiO2, Hypercapnia, MAP_category,
+     RSBI, qSOFA, MV_duration_h, ICU_LOS_days, ICU_time_ge4, LOS_gt_MV, pred_score }
+*/
+const PHASE0_IDS = [28];
+const PHASE1_IDS = [278];
+const PHASE2_IDS = [438];
+const PHASE3_IDS = [830];
 
+/* === SAME CASES AS YOUR GROUP 2 PAGE (paste the same CASES object here) === */
 const CASES = {
-  29208: {"encounterId":29208,"t_decision":"2012-08-03T15:27:00Z","age":63,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":1118.3941666666667,"pred_score":0.99874},
-  8546: {"encounterId":8546,"t_decision":"2012-04-02T22:30:00Z","age":55,"sex":"Female","race":"Malay","HR_cat":"60-100","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":1,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":604.4138888888889,"pred_score":0.992645},
-  37379: {"encounterId":37379,"t_decision":"2013-08-17T08:51:00Z","age":57,"sex":"Female","race":"Malay","HR_cat":"60-100","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":0,"Hypercapnia":1,"MAP_cat":">105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":3.0,"ICU_LOS_h":451.56472222222226,"pred_score":0.980093},
-  40689: {"encounterId":40689,"t_decision":"2013-12-10T11:45:00Z","age":74,"sex":"Male","race":"Chinese","HR_cat":"<60","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":391.94194444444446,"pred_score":0.977681},
-  28125: {"encounterId":28125,"t_decision":"2012-06-19T12:16:00Z","age":65,"sex":"Male","race":"Others","HR_cat":">100","RR_gt20":0,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":246.7952777777778,"pred_score":0.957298},
-  27048: {"encounterId":27048,"t_decision":"2012-09-18T00:58:00Z","age":76,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"<7.35","PF_lt300":1,"Hypercapnia":1,"MAP_cat":"70-105","RSBI_gt105":1,"qsofa":3,"MV_duration_h":1.0,"ICU_LOS_h":113.93111111111111,"pred_score":0.873862},
-  33810: {"encounterId":33810,"t_decision":"2013-05-19T03:39:00Z","age":58,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":1,"pH_cat":"7.35-7.45","PF_lt300":1,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":320.3363888888889,"pred_score":0.858618},
-  17121: {"encounterId":17121,"t_decision":"2012-04-15T03:59:00Z","age":75,"sex":"Male","race":"Indian","HR_cat":"60-100","RR_gt20":1,"pH_cat":"7.35-7.45","PF_lt300":1,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":1,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":302.4186111111111,"pred_score":0.801536},
-  43042: {"encounterId":43042,"t_decision":"2012-06-17T07:24:00Z","age":66,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":1,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":105.12027777777777,"pred_score":0.670846},
-  43571: {"encounterId":43571,"t_decision":"2012-05-09T04:45:00Z","age":64,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":72.2925,"pred_score":0.57216},
-  30190: {"encounterId":30190,"t_decision":"2013-03-15T22:44:00Z","age":77,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":2,"MV_duration_h":1.0,"ICU_LOS_h":64.26611111111112,"pred_score":0.542402},
-  14299: {"encounterId":14299,"t_decision":"2013-05-02T07:45:00Z","age":69,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":119.84944444444444,"pred_score":0.468436},
-  29354: {"encounterId":29354,"t_decision":"2013-01-24T06:30:00Z","age":51,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":121.19083333333333,"pred_score":0.411354},
-  9032: {"encounterId":9032,"t_decision":"2013-12-28T06:14:00Z","age":58,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":50.050555555555555,"pred_score":0.383403},
-  33751: {"encounterId":33751,"t_decision":"2013-09-30T10:11:00Z","age":67,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":101.50333333333333,"pred_score":0.355195},
-  20901: {"encounterId":20901,"t_decision":"2012-08-06T20:50:00Z","age":74,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":182.07805555555555,"pred_score":0.311297},
-  25151: {"encounterId":25151,"t_decision":"2013-11-23T09:43:00Z","age":72,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":59.326388888888886,"pred_score":0.285443},
-  45967: {"encounterId":45967,"t_decision":"2013-12-14T23:28:00Z","age":64,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":38.39472222222222,"pred_score":0.2671},
-  1786: {"encounterId":1786,"t_decision":"2013-10-16T18:35:00Z","age":57,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":59.0125,"pred_score":0.244408},
-  61660: {"encounterId":61660,"t_decision":"2013-06-10T05:21:00Z","age":63,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":55.77916666666667,"pred_score":0.228701},
-  45177: {"encounterId":45177,"t_decision":"2013-12-13T02:41:00Z","age":54,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":39.6075,"pred_score":0.211923},
-  48346: {"encounterId":48346,"t_decision":"2013-11-29T23:29:00Z","age":67,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":84.40333333333334,"pred_score":0.194736},
-  38750: {"encounterId":38750,"t_decision":"2013-11-02T06:49:00Z","age":51,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":0,"MV_duration_h":1.0,"ICU_LOS_h":43.385555555555555,"pred_score":0.172603},
-  24092: {"encounterId":24092,"t_decision":"2013-05-29T20:00:00Z","age":76,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":64.56083333333333,"pred_score":0.158129},
-  30380: {"encounterId":30380,"t_decision":"2013-12-20T01:48:00Z","age":74,"sex":"Male","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":57.852222222222224,"pred_score":0.139211},
-  11549: {"encounterId":11549,"t_decision":"2013-10-29T01:22:00Z","age":70,"sex":"Female","race":"Chinese","HR_cat":"60-100","RR_gt20":0,"pH_cat":"7.35-7.45","PF_lt300":0,"Hypercapnia":0,"MAP_cat":"70-105","RSBI_gt105":0,"qsofa":1,"MV_duration_h":1.0,"ICU_LOS_h":95.64138888888888,"pred_score":0.121912}
+  28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,        ICU_LOS_days:0.611689815, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:69 },
+  67:  { encounterId:67,  Age:56, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:36.41666667, ICU_LOS_days:1.518726852, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  89:  { encounterId:89,  Age:51, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"???20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:11.25,       ICU_LOS_days:0.655543981, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  94:  { encounterId:94,  Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:19,          ICU_LOS_days:0.775405093, ICU_time_ge4:"PASS", LOS_gt_MV:"FAIL", pred_score:null },
+  158: { encounterId:158, Age:25, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,        ICU_LOS_days:0.744097222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  215: { encounterId:215, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.25,        ICU_LOS_days:1.397303241, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  218: { encounterId:218, Age:65, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"<7.35",     PaO2_FiO2:"???300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:11.5,        ICU_LOS_days:0.599421296, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+
+  278: { encounterId:278, Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:19,          ICU_LOS_days:1.75724537,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:58 },
+  279: { encounterId:279, Age:77, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:">7.45",     PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:151.15,      ICU_LOS_days:6.726284722, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  285: { encounterId:285, Age:51, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8.5,         ICU_LOS_days:0.551423611, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  296: { encounterId:296, Age:61, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,           ICU_LOS_days:0.433287037, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  301: { encounterId:301, Age:49, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"<7.35",     PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:17.35,       ICU_LOS_days:0.870243056, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  341: { encounterId:341, Age:69, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"<7.35",     PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.25,        ICU_LOS_days:0.791018519, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  378: { encounterId:378, Age:52, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:7.5,         ICU_LOS_days:0.507372685, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+
+  438: { encounterId:438, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:">7.45",     PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17,          ICU_LOS_days:0.773333333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:60 },
+  459: { encounterId:459, Age:75, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:2.25,        ICU_LOS_days:0.193599537, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  494: { encounterId:494, Age:55, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:6.75,        ICU_LOS_days:1.0146875,   ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  498: { encounterId:498, Age:56, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.916666667, ICU_LOS_days:0.393634259, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  608: { encounterId:608, Age:48, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,        ICU_LOS_days:0.698136574, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  728: { encounterId:728, Age:57, Sex:"Male",   Race:"Indian",  HR_category:">100",   RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.5,         ICU_LOS_days:0.46869213,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  795: { encounterId:795, Age:47, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:8.5,         ICU_LOS_days:0.424363426, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+
+  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:39 },
+  839: { encounterId:839, Age:72, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8,           ICU_LOS_days:2.223090278, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  859: { encounterId:859, Age:73, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:25.75,       ICU_LOS_days:1.181168981, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  920: { encounterId:920, Age:65, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17.03333333, ICU_LOS_days:1.191493056, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  945: { encounterId:945, Age:45, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20",   Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:11,          ICU_LOS_days:0.565555556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  1002:{ encounterId:1002,Age:70, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300",  Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:"",MV_duration_h:6.5,         ICU_LOS_days:0.463888889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  1009:{ encounterId:1009,Age:63, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:5.25,        ICU_LOS_days:0.406944444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null },
+  1045:{ encounterId:1045,Age:51, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:"???20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"???300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:10.83333333, ICU_LOS_days:0.704236111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:null }
 };
 
 /* ===========================
@@ -329,13 +341,6 @@ function shuffle(arr){
   }
   return a;
 }
-function fmtBool01(v, yesTxt, noTxt){ return (Number(v) === 1) ? yesTxt : noTxt; }
-function fmtHours(h){
-  if (h === null || h === undefined || isNaN(h)) return "—";
-  const x = Number(h);
-  if (x < 24) return `${x.toFixed(1)} h`;
-  return `${(x/24).toFixed(1)} days`;
-}
 function getParams(){
   const p = new URLSearchParams(window.location.search);
   return { train: p.get("train") || "", admin: p.get("admin") || "" };
@@ -349,8 +354,15 @@ function getTrainingURL(){
 }
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
 
-// Binary label uses internal cutoff; cutoff is NOT displayed
-// Matches the question: reintubation within 48 hours
+/* Normalize risk: accept 0–1 OR 0–100 */
+function normalizeRisk(raw){
+  const x = Number(raw);
+  if (!isFinite(x)) return NaN;
+  if (x > 1) return x / 100;
+  return x;
+}
+
+/* Group 1: binary uses internal cutoff (NOT displayed) */
 function aiBinaryLabel(risk){
   if (!isFinite(risk)) return "—";
   return (risk >= INTERNAL_BINARY_CUTOFF)
@@ -358,92 +370,67 @@ function aiBinaryLabel(risk){
     : "No (will NOT require reintubation within 48 hours)";
 }
 
-/* ===== Table helpers (match Group 0) ===== */
-function tagHtml(status){
-  if (status === "PASS") return '<span class="tag ok">PASS</span>';
-  if (status === "FAIL") return '<span class="tag bad">FAIL</span>';
-  return '<span class="tag na">Unknown</span>';
+/* ===== Patient table (same look/logic as Group 2) ===== */
+function tagHtml(kind){
+  if (kind === "PASS") return '<span class="tag ok">PASS</span>';
+  if (kind === "FAIL") return '<span class="tag bad">FAIL</span>';
+  return '<span class="tag na">Not available</span>';
 }
+function safe(v){ return (v === null || v === undefined || String(v).trim() === "") ? "—" : String(v); }
 
-function computeChecks(c){
-  const los = Number(c?.ICU_LOS_h);
-  const mv  = Number(c?.MV_duration_h);
-  let losGtMv = null;
-  if (isFinite(los) && isFinite(mv)) losGtMv = (los > mv);
-  return { losGtMv };
-}
-
+/* Keep your exact strings, but make ??? show as-is */
 function buildCaseTableHTML(c){
   if (!c) return '<div class="note">Error: case data not found.</div>';
 
-  const checks = computeChecks(c);
-  const losGtMvStatus = (checks.losGtMv === null) ? "UNKNOWN" : (checks.losGtMv ? "PASS" : "FAIL");
-  const losGtMvTag = (losGtMvStatus === "PASS") ? tagHtml("PASS") : (losGtMvStatus === "FAIL" ? tagHtml("FAIL") : tagHtml("UNKNOWN"));
-
-  const rrLine   = fmtBool01(c.RR_gt20, ">20", "≤20");
-  const pfLine   = fmtBool01(c.PF_lt300, "<300", "≥300");
-  const hypLine  = fmtBool01(c.Hypercapnia, "Yes", "No");
-  const rsbiLine = (c.RSBI_gt105 === undefined) ? "—" : fmtBool01(c.RSBI_gt105, ">105", "≤105");
-  const qsofaLine = (c.qsofa ?? "—");
-
-  // IMPORTANT: We do NOT show:
-  // - Observed outcome label
-  // - ICU admission time
-  // - Extubation time
   return `
     <table aria-label="Case data table">
       <tr><th colspan="2">Patient demographics</th></tr>
-      <tr><td>Age</td><td>${c.age ?? "—"}</td></tr>
-      <tr><td>Sex</td><td>${c.sex ?? "—"}</td></tr>
-      <tr><td>Race</td><td>${c.race ?? "—"}</td></tr>
+      <tr><td>Encounter</td><td>${safe(c.encounterId)}</td></tr>
+      <tr><td>Age</td><td>${safe(c.Age)}</td></tr>
+      <tr><td>Sex</td><td>${safe(c.Sex)}</td></tr>
+      <tr><td>Race</td><td>${safe(c.Race)}</td></tr>
 
       <tr><th colspan="2">Pre-extubation snapshot variables</th></tr>
-      <tr><td>HR category</td><td>${c.HR_cat ?? "—"}</td></tr>
-      <tr><td>RR</td><td>${rrLine}</td></tr>
-      <tr><td>Arterial pH</td><td>${c.pH_cat ?? "—"}</td></tr>
-      <tr><td>PaO₂/FiO₂</td><td>${pfLine}</td></tr>
-      <tr><td>Hypercapnia</td><td>${hypLine}</td></tr>
-      <tr><td>MAP category</td><td>${c.MAP_cat ?? "—"}</td></tr>
-      <tr><td>RSBI</td><td>${rsbiLine}</td></tr>
-      <tr><td>qSOFA</td><td>${qsofaLine}</td></tr>
+      <tr><td>HR category</td><td>${safe(c.HR_category)}</td></tr>
+      <tr><td>RR</td><td>${safe(c.RR)}</td></tr>
+      <tr><td>Arterial pH</td><td>${safe(c.Arterial_pH)}</td></tr>
+      <tr><td>PaO₂/FiO₂</td><td>${safe(c.PaO2_FiO2)}</td></tr>
+      <tr><td>Hypercapnia</td><td>${safe(c.Hypercapnia)}</td></tr>
+      <tr><td>MAP category</td><td>${safe(c.MAP_category)}</td></tr>
+      <tr><td>RSBI</td><td>${safe(c.RSBI)}</td></tr>
+      <tr><td>qSOFA</td><td>${safe(c.qSOFA)}</td></tr>
 
       <tr><th colspan="2">Durations</th></tr>
-      <tr><td>Mechanical ventilation duration</td><td>${fmtHours(c.MV_duration_h)}</td></tr>
-      <tr><td>ICU LOS (so far)</td><td>${fmtHours(c.ICU_LOS_h)}</td></tr>
+      <tr><td>Mechanical ventilation duration (h)</td><td>${safe(c.MV_duration_h)}</td></tr>
+      <tr><td>ICU LOS (so far) (days)</td><td>${safe(c.ICU_LOS_days)}</td></tr>
 
-      <tr><th colspan="2">Eligibility checks (requirements)</th></tr>
-      <tr><td>LOS &gt; MV duration</td><td>${losGtMvTag}</td></tr>
+      <tr><th colspan="2">Eligibility checks</th></tr>
+      <tr><td>ICU time ≥ 4 hours</td><td>${tagHtml(c.ICU_time_ge4)}</td></tr>
+      <tr><td>LOS &gt; MV duration</td><td>${tagHtml(c.LOS_gt_MV)}</td></tr>
 
       <tr><th colspan="2">Other extubation criteria (availability)</th></tr>
-      <tr>
-        <td>Norepinephrine &lt; 0.05 mcg/kg/min at extubation</td>
-        <td><span class="tag na">Not available</span></td>
-      </tr>
-      <tr>
-        <td>Chest tube drainage &lt; 100 mL/h</td>
-        <td><span class="tag na">Not available</span></td>
-      </tr>
-      <tr>
-        <td>RASS between −1 and +1</td>
-        <td><span class="tag na">Not available</span></td>
-      </tr>
+      <tr><td>Norepinephrine &lt; 0.05 mcg/kg/min at extubation</td><td>${tagHtml("NA")}</td></tr>
+      <tr><td>Chest tube drainage &lt; 100 mL/h</td><td>${tagHtml("NA")}</td></tr>
+      <tr><td>RASS between −1 and +1</td><td>${tagHtml("NA")}</td></tr>
     </table>
   `;
 }
 
 /* ===========================
-   WEB3FORMS SUBMIT (JSON-only)
+   WEB3FORMS SUBMIT (with timeout like Group 2)
    =========================== */
+const SUBMIT_TIMEOUT_MS = 12000;
+
 async function submitRecord(payload){
   const url = "https://api.web3forms.com/submit";
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
 
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
+      headers: { "Content-Type":"application/json", "Accept":"application/json" },
+      signal: controller.signal,
       body: JSON.stringify({
         access_key: ACCESS_KEY,
         from_name: "CTICU Survey",
@@ -454,7 +441,6 @@ async function submitRecord(payload){
     });
 
     const json = await res.json().catch(() => ({}));
-
     return {
       ok: !!json.success,
       status: res.status,
@@ -462,12 +448,13 @@ async function submitRecord(payload){
       raw: json
     };
   } catch (e) {
-    return {
-      ok: false,
-      status: 0,
-      message: e?.message || "Network error / blocked request",
-      raw: null
-    };
+    const msg =
+      (e && e.name === "AbortError")
+        ? `Request timed out after ${Math.round(SUBMIT_TIMEOUT_MS/1000)}s`
+        : (e?.message || "Network error / blocked request");
+    return { ok:false, status:0, message: msg, raw:null };
+  } finally {
+    clearTimeout(t);
   }
 }
 
@@ -533,7 +520,7 @@ function renderPhaseHeader(){
       <a href="${safeUrl}" target="_blank" rel="noopener"><b>Open training document (PDF)</b></a>.`;
   } else {
     $("phaseTitle").textContent = "Phase 3 — AI Support (Binary + Risk)";
-    $("phaseIntro").innerHTML = "You will see the same AI support as before: binary suggestion and estimated risk.";
+    $("phaseIntro").innerHTML = "Same AI support format as Phase 2 (binary + risk).";
   }
 
   $("status").textContent =
@@ -574,7 +561,7 @@ function renderCurrentCase(){
   $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
   $("caseTableWrap").innerHTML = buildCaseTableHTML(c);
 
-  const risk = Number(c.pred_score);
+  const risk = normalizeRisk(c.pred_score);
   const showProb = (state.phase === 2 || state.phase === 3);
 
   // AI support label (binary shown in Phase 1–3)
@@ -582,7 +569,9 @@ function renderCurrentCase(){
 
   // Probability panel shown only in Phase 2–3 (no threshold)
   $("aiPanel").classList.toggle("hidden", !showProb);
-  $("aiRiskLabel").textContent = showProb && isFinite(risk) ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`) : "—";
+  $("aiRiskLabel").textContent = showProb && isFinite(risk)
+    ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`)
+    : "—";
 
   // Marker (AI only)
   const aiMarker = $("aiMarker");
@@ -675,7 +664,7 @@ async function handleCaseSubmit(isSkip){
     rationale = $("rationale").value.trim();
   }
 
-  const risk = c ? Number(c.pred_score) : NaN;
+  const risk = c ? normalizeRisk(c.pred_score) : NaN;
   const showProb = (state.phase === 2 || state.phase === 3);
 
   const payload = {
@@ -684,7 +673,6 @@ async function handleCaseSubmit(isSkip){
     phase: state.phase,
     phase_case_index: state.idx + 1,
     encounter_id: c ? c.encounterId : "",
-    t_decision: c ? c.t_decision : "",
 
     ai_support_present: (state.phase === 0) ? "no" : "yes",
     ai_support_type:
@@ -694,7 +682,7 @@ async function handleCaseSubmit(isSkip){
 
     ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk),
 
-    // these are AI risk of REINTUBATION within 48h
+    // AI risk of REINTUBATION within 48h
     risk_score_shown: (showProb && c && isFinite(risk)) ? risk.toFixed(6) : "",
     risk_percent_shown: (showProb && c && isFinite(risk)) ? String(Math.round(risk*100)) : "",
     threshold_shown: "",
@@ -704,12 +692,22 @@ async function handleCaseSubmit(isSkip){
     time_seconds
   };
 
+  // Store same patient fields as Group 2
   if (c){
     Object.assign(payload, {
-      age: c.age, sex: c.sex, race: c.race,
-      HR_cat: c.HR_cat, RR_gt20: c.RR_gt20, pH_cat: c.pH_cat, PF_lt300: c.PF_lt300,
-      Hypercapnia: c.Hypercapnia, MAP_cat: c.MAP_cat, RSBI_gt105: c.RSBI_gt105, qsofa: c.qsofa,
-      MV_duration_h: c.MV_duration_h, ICU_LOS_h: c.ICU_LOS_h
+      Age: c.Age, Sex: c.Sex, Race: c.Race,
+      HR_category: c.HR_category,
+      RR: c.RR,
+      Arterial_pH: c.Arterial_pH,
+      PaO2_FiO2: c.PaO2_FiO2,
+      Hypercapnia: c.Hypercapnia,
+      MAP_category: c.MAP_category,
+      RSBI: c.RSBI,
+      qSOFA: c.qSOFA,
+      MV_duration_h: c.MV_duration_h,
+      ICU_LOS_days: c.ICU_LOS_days,
+      ICU_time_ge4: c.ICU_time_ge4,
+      LOS_gt_MV: c.LOS_gt_MV
     });
   }
 
