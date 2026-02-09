@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CTICU Extubation Decision Survey — Group 1</title>
+  <style>
+    :root { --border:#e5e7eb; --text:#111827; --muted:#6b7280; --bg:#ffffff; --soft:#f9fafb; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; max-width: 980px; color:var(--text); background:var(--bg); }
+    h1 { margin: 0 0 6px; }
+    .note { color: var(--muted); font-size: 0.95rem; line-height: 1.35; }
+    .card { border:1px solid var(--border); border-radius: 14px; padding: 18px; margin: 14px 0; background: #fff; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display:block; font-weight:650; margin-top: 10px; }
+    input, textarea { width:100%; padding: 10px; margin-top: 6px; border-radius: 12px; border:1px solid #d1d5db; font-size: 14px; }
+    textarea { min-height: 90px; }
+    .hidden { display:none; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background: var(--soft); border:1px solid var(--border); margin-right: 8px; font-size: 13px; }
+    .pill.active { background:#e8f3ff; border-color:#3b82f6; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1px solid #111; background:#111; color:#fff; cursor:pointer; font-weight: 650; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .btn2 { padding: 10px 14px; border-radius: 12px; border: 1px solid #9ca3af; background:#fff; color:#111; cursor:pointer; font-weight: 650; }
+    .success { color:#0a7a2f; font-weight: 800; }
+    .warn { color:#8a2a00; font-weight: 800; }
+    .casebox { border:1px solid var(--border); background: var(--soft); border-radius: 14px; padding: 14px; margin-top: 10px; }
+    .kv { margin: 6px 0; }
+    .kv b { font-weight: 800; }
+    .divider { height:1px; background: var(--border); margin: 12px 0; }
+    .small { font-size: 12.5px; color: var(--muted); }
+    a { color:#0b63ce; }
+    a:visited { color:#0b63ce; }
+
+    /* ===== Bar (AI display only) ===== */
+    .barWrap { margin-top: 8px; }
+    .barTopRow { display:flex; align-items:flex-start; justify-content:space-between; gap: 10px; }
+    .pillBox {
+      display:inline-block; padding: 6px 10px; border-radius: 999px;
+      background:#fff; border:1px solid var(--border);
+      font-size: 13px; font-weight: 800; white-space: nowrap;
+    }
+
+    .barContainer { position: relative; margin-top: 10px; height: 34px; }
+    .track {
+      position:absolute; left:0; right:0; top: 14px;
+      height: 6px; border-radius: 999px; background: #d1d5db;
+    }
+
+    .marker {
+      position: absolute;
+      top: 11px;
+      width: 2px;
+      height: 14px;
+      background: #111827;
+      z-index: 3;
+      transform: translateX(-1px);
+      border-radius: 2px;
+      opacity: 0.95;
+    }
+    .markerLabel {
+      position: absolute;
+      top: -2px;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      z-index: 3;
+      background: rgba(255,255,255,0.85);
+      padding: 0 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .marker.ai { background: #2563eb; }
+
+    .barLabels { display:flex; justify-content:space-between; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+    /* Yes/No choice */
+    .ynRow { display:flex; gap: 16px; align-items:center; margin-top: 8px; flex-wrap: wrap; }
+    .ynChoice { display:flex; gap: 8px; align-items:center; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; background:#fff; cursor:pointer; }
+    .ynChoice input { width:auto; margin:0; padding:0; }
+    .questionBox { padding: 12px; border:1px solid var(--border); border-radius: 14px; background:#fff; margin-top: 12px; }
+
+    /* ===== Patient table ===== */
+    table { width:100%; border-collapse: collapse; margin-top: 10px; background:#fff; border:1px solid var(--border); border-radius: 12px; overflow:hidden; }
+    th, td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
+    th { text-align:left; background:#f8fafc; font-weight: 800; }
+    tr:last-child td { border-bottom: none; }
+    .tag { display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:#fff; font-size:12px; font-weight:800; }
+    .tag.ok { border-color:#16a34a; color:#166534; background:#f0fdf4; }
+    .tag.bad { border-color:#ef4444; color:#7f1d1d; background:#fef2f2; }
+    .tag.na  { border-color:#9ca3af; color:#374151; background:#f9fafb; }
+    .inlineLink { font-size:12.5px; color:var(--muted); margin-left: 8px; }
+  </style>
+</head>
+
+<body>
+  <h1>CTICU Extubation Decision Survey — Group 1</h1>
+  <p class="note">
+    Thank you for participating in this study.
+    This survey is designed to better understand <b>clinical decision-making around extubation in the ICU</b> and how different forms of decision support may influence judgments about patient outcomes.
+    <br/><br/>
+    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would require <b>reintubation within 48 hours</b>.
+    <br/><br/>
+    The survey typically takes approximately <b>30 minutes</b> to complete.
+    Please respond based on your clinical judgment.
+    <br/><br/>
+    Thank you for your time and contribution to this research.
+    <br/><br/>
+    If you have any questions or problems please contact <a href="mailto:tdktrang@vt.edu">tdktrang@vt.edu</a>.
+  </p>
+
+  <!-- ===================== SETUP ===================== -->
+  <div class="card" id="setupCard">
+    <h2 style="margin:0 0 6px;">Participant Info</h2>
+    <p class="note" style="margin:0 0 8px;">
+      Please enter a study ID (no personal identifiers). You can’t start until Doctor ID is filled.
+    </p>
+
+    <div class="row">
+      <div>
+        <label for="doctor_id">Doctor ID (or initials)</label>
+        <input id="doctor_id" placeholder="e.g., D023" required />
+      </div>
+      <div>
+        <label for="specialty">Specialty (optional)</label>
+        <input id="specialty" placeholder="Pulm/Critical Care" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="years_exp">Years of experience (optional)</label>
+        <input id="years_exp" type="number" min="0" max="60" placeholder="e.g., 7" />
+      </div>
+      <div>
+        <label for="group_id">Group / Arm (optional)</label>
+        <input id="group_id" value="Group 1" readonly />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ADMIN-ONLY SETTINGS (hidden unless ?admin=1) -->
+    <div id="adminSettings" class="hidden">
+      <h3 style="margin:0 0 6px;">Admin Settings</h3>
+      <div class="row">
+        <div>
+          <label for="training_url">Training Document URL (Phase 2)</label>
+          <input id="training_url" placeholder="Paste link (PDF/Doc), or leave blank" />
+          <div class="small">If empty, will use URL param <code>?train=</code> or default training URL.</div>
+        </div>
+        <div>
+          <label for="guidelines_url">Formal Guidelines URL (CTICU extubation procedure)</label>
+          <input id="guidelines_url" placeholder="Paste link (PDF/Doc), or leave blank" />
+          <div class="small">If empty, will use URL param <code>?guide=</code> or default guidelines URL.</div>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:8px;">
+        Tip: <code>?train=https://...&amp;guide=https://...&amp;admin=1</code>
+      </div>
+
+      <div class="small" style="margin-top:8px;">
+        Group 1 does <b>not</b> display or use a threshold.
+      </div>
+    </div>
+
+    <div style="margin-top: 14px; display:flex; gap:10px; align-items:center;">
+      <button class="btn" id="startBtn" type="button">Start Survey</button>
+      <span class="note" id="setupMsg"></span>
+    </div>
+  </div>
+
+  <!-- ===================== PROGRESS ===================== -->
+  <div class="card hidden" id="progressCard">
+    <h2 style="margin:0 0 6px;">Progress</h2>
+    <div style="margin-top:6px;">
+      <span class="pill" id="p0pill">Phase 0</span>
+      <span class="pill" id="p1pill">Phase 1</span>
+      <span class="pill" id="p2pill">Phase 2</span>
+      <span class="pill" id="p3pill">Phase 3</span>
+      <span class="pill" id="casePill">Case —</span>
+    </div>
+    <p id="status" class="note" style="margin:10px 0 0;">—</p>
+  </div>
+
+  <!-- ===================== MAIN CASE UI ===================== -->
+  <div class="card hidden" id="caseCard">
+    <h2 style="margin:0 0 6px;" id="phaseTitle">—</h2>
+
+    <div id="phaseIntro" class="note" style="margin:0 0 8px;"></div>
+
+    <div class="casebox">
+      <div class="kv"><b id="caseHeader">Case —</b></div>
+
+      <!-- Table view -->
+      <div id="caseTableWrap"></div>
+
+      <div class="divider"></div>
+
+      <div class="kv" id="aiBinaryRow">AI Support (binary): <b id="aiSupportBinary">—</b></div>
+
+      <div id="aiPanel" class="hidden" style="margin-top:8px;">
+        <div class="kv">AI Risk (reintubation probability): <b id="aiRiskLabel">—</b></div>
+      </div>
+    </div>
+
+    <form id="answerForm">
+      <div class="questionBox">
+        <div style="font-weight:800;">
+          If extubated now, will the patient require reintubation within 48 hours?
+        </div>
+
+        <div class="ynRow" role="radiogroup" aria-label="Reintubation within 48 hours yes/no">
+          <label class="ynChoice">
+            <input type="radio" name="human_reintubation_prediction" value="yes" />
+            <b>Yes</b> (will require reintubation within 48 hours)
+          </label>
+          <label class="ynChoice">
+            <input type="radio" name="human_reintubation_prediction" value="no" />
+            <b>No</b> (will NOT require reintubation within 48 hours)
+          </label>
+        </div>
+
+        <div class="small" style="margin-top:8px;">
+          Your response is <b>Yes/No only</b>.
+        </div>
+      </div>
+
+      <!-- AI display bar (HIDDEN in Phase 0 and Phase 1) -->
+      <div id="aiBarWrap" class="barWrap">
+        <div class="barTopRow">
+          <div class="note" style="margin:0;">
+            <b>0</b> = low reintubation risk &nbsp;•&nbsp;
+            <b>100</b> = high reintubation risk
+          </div>
+          <span class="pillBox" id="aiReadout">AI: —</span>
+        </div>
+
+        <div class="barContainer" id="barContainer">
+          <div class="track"></div>
+
+          <div id="aiMarker" class="marker ai hidden"></div>
+          <div id="aiMarkerLabel" class="markerLabel hidden"></div>
+        </div>
+
+        <div class="barLabels">
+          <span>0 = low risk</span>
+          <span>50 = borderline</span>
+          <span>100 = high risk</span>
+        </div>
+
+        <div class="small" style="margin-top:8px;">
+          The blue marker shows the AI-estimated probability of reintubation within 48 hours on this scale.
+        </div>
+      </div>
+
+      <label>Rationale (optional)</label>
+      <textarea name="rationale" id="rationale" placeholder="Brief reasoning…"></textarea>
+
+      <div style="margin-top: 14px; display:flex; gap:10px; align-items:center;">
+        <button class="btn" id="submitBtn" type="submit">Submit & Next</button>
+        <button class="btn2" id="skipBtn" type="button">Skip (records blank) & Next</button>
+        <span class="note" id="msg"></span>
+      </div>
+
+      <div class="small" style="margin-top:10px;">
+        Each case is submitted as a separate record to Web3Forms.
+      </div>
+    </form>
+  </div>
+
+  <!-- ===================== DONE ===================== -->
+  <div class="card hidden" id="doneCard">
+    <h2 style="margin:0 0 6px;">Completed</h2>
+    <p class="note"><span class="success">All phases completed.</span> Thank you! You may close this window.</p>
+    <button class="btn2" id="resetBtn" type="button">Reset (start over)</button>
+  </div>
+
+<script>
+/* ===========================
+   CONFIG
+   =========================== */
+const ACCESS_KEY = "7995a7eb-0ff4-4e0c-8e18-d0a12db2ddc9";
+const DEFAULT_TRAIN_URL = "https://www.dropbox.com/scl/fi/tue9k0lyb26zpaycjxy25/slides-draft.pdf?rlkey=7z9qjtbhch5ffgcff8g0wngwx&dl=0";
+
+/* NEW: Formal guidelines link (used in Eligibility section) */
+const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.pdf"; // <-- replace if you want
+
+// Internal cutoff for binary AI label (NOT shown to participants)
+const INTERNAL_BINARY_CUTOFF = 0.5;
+
+/* ===== Cohort phases (unchanged) ===== */
+const PHASE0_IDS = [28];
+const PHASE1_IDS = [278];
+const PHASE2_IDS = [438];
+const PHASE3_IDS = [830];
+
+/* === UPDATED CASES (new patient values + ICU LOS hours) ===
+   Schema:
+   { encounterId, Age, Sex, Race, HR_category, RR, Arterial_pH, PaO2_FiO2, Hypercapnia, MAP_category,
+     RSBI, qSOFA, MV_duration_h, ICU_LOS_days, ICU_LOS_hours, ICU_time_ge4, LOS_gt_MV, pred_score }
+   Notes:
+   - "CTICU guideline extubation procedure" is shown as PASS for ALL patients (no criteria detail).
+   - pred_score values are RANDOM-looking placeholders (0–100) as requested.
+*/
+const CASES = {
+  28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,         ICU_LOS_days:0.611689815, ICU_LOS_hours:14.68055556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:69 },
+  67:  { encounterId:67,  Age:56, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:36.41666667, ICU_LOS_days:1.518726852, ICU_LOS_hours:36.44944444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:41 },
+  89:  { encounterId:89,  Age:51, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:11.25,        ICU_LOS_days:0.655543981, ICU_LOS_hours:15.73305556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:77 },
+  158: { encounterId:158, Age:25, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,         ICU_LOS_days:0.744097222, ICU_LOS_hours:17.85833333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:33 },
+  215: { encounterId:215, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.25,         ICU_LOS_days:1.397303241, ICU_LOS_hours:33.53527778, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:52 },
+  218: { encounterId:218, Age:65, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:11.5,         ICU_LOS_days:0.599421296, ICU_LOS_hours:14.38611111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:64 },
+  278: { encounterId:278, Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:19,           ICU_LOS_days:1.75724537,  ICU_LOS_hours:42.17388889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:58 },
+  279: { encounterId:279, Age:77, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:151.15,       ICU_LOS_days:6.726284722, ICU_LOS_hours:161.4308333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:21 },
+  285: { encounterId:285, Age:51, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8.5,          ICU_LOS_days:0.551423611, ICU_LOS_hours:13.23416667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:47 },
+  296: { encounterId:296, Age:61, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,            ICU_LOS_days:0.433287037, ICU_LOS_hours:10.39888889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:55 },
+  301: { encounterId:301, Age:49, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:17.35,        ICU_LOS_days:0.870243056, ICU_LOS_hours:20.88583333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:73 },
+  341: { encounterId:341, Age:69, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.25,         ICU_LOS_days:0.791018519, ICU_LOS_hours:18.98444444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:19 },
+  378: { encounterId:378, Age:52, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:7.5,          ICU_LOS_days:0.507372685, ICU_LOS_hours:12.17694444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:61 },
+  438: { encounterId:438, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17,           ICU_LOS_days:0.773333333, ICU_LOS_hours:18.56,       ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:60 },
+  459: { encounterId:459, Age:75, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:2.25,         ICU_LOS_days:0.193599537, ICU_LOS_hours:4.646388889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:12 },
+  494: { encounterId:494, Age:55, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:6.75,         ICU_LOS_days:1.0146875,   ICU_LOS_hours:24.3525,    ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:49 },
+  498: { encounterId:498, Age:56, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.916666667, ICU_LOS_days:0.393634259, ICU_LOS_hours:9.447222222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:67 },
+  608: { encounterId:608, Age:48, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,         ICU_LOS_days:0.698136574, ICU_LOS_hours:16.75527778, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:82 },
+  728: { encounterId:728, Age:57, Sex:"Male",   Race:"Indian",  HR_category:">100",   RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.5,          ICU_LOS_days:0.46869213,  ICU_LOS_hours:11.24861111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:38 },
+  795: { encounterId:795, Age:47, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:8.5,          ICU_LOS_days:0.424363426, ICU_LOS_hours:10.18472222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:44 },
+  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_LOS_hours:17.22388889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:39 },
+  839: { encounterId:839, Age:72, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8,            ICU_LOS_days:2.223090278, ICU_LOS_hours:53.35416667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:57 },
+  859: { encounterId:859, Age:73, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:25.75,        ICU_LOS_days:1.181168981, ICU_LOS_hours:28.34805556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:70 },
+  920: { encounterId:920, Age:65, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17.03333333, ICU_LOS_days:1.191493056, ICU_LOS_hours:28.59583333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:28 },
+  945: { encounterId:945, Age:45, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:11,           ICU_LOS_days:0.565555556, ICU_LOS_hours:13.57333333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:63 },
+  1009:{ encounterId:1009,Age:63, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:5.25,         ICU_LOS_days:0.406944444, ICU_LOS_hours:9.766666667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:46 },
+  1045:{ encounterId:1045,Age:51, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:10.83333333, ICU_LOS_days:0.704236111, ICU_LOS_hours:16.90166667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:54 },
+
+  1092:{ encounterId:1092,Age:65, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.083333333, ICU_LOS_days:0.328229167, ICU_LOS_hours:7.8775,      ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:36 },
+  1095:{ encounterId:1095,Age:63, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:9.666666667, ICU_LOS_days:0.609918981, ICU_LOS_hours:14.63805556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:59 },
+  1101:{ encounterId:1101,Age:54, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:6.866666667, ICU_LOS_days:0.635983796, ICU_LOS_hours:15.26361111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:48 },
+  1171:{ encounterId:1171,Age:55, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:9.5,          ICU_LOS_days:0.547453704, ICU_LOS_hours:13.13888889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:31 },
+  1205:{ encounterId:1205,Age:44, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:8.583333333, ICU_LOS_days:0.673865741, ICU_LOS_hours:16.17277778, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:66 },
+  1235:{ encounterId:1235,Age:72, Sex:"Male",   Race:"Chinese", HR_category:"<60",    RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,            ICU_LOS_days:0.292962963, ICU_LOS_hours:7.031111111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:27 },
+  1291:{ encounterId:1291,Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:7,            ICU_LOS_days:0.506956019, ICU_LOS_hours:12.16694444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:53 },
+  1321:{ encounterId:1321,Age:73, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.75,         ICU_LOS_days:0.420196759, ICU_LOS_hours:10.08472222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:18 },
+  1335:{ encounterId:1335,Age:53, Sex:"Male",   Race:"Malay",   HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:5.75,         ICU_LOS_days:0.416736111, ICU_LOS_hours:10.00166667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:62 }
+};
+
+/* ===========================
+   HELPERS
+   =========================== */
+function $(id){ return document.getElementById(id); }
+function setPill(id, active){ $(id).classList.toggle("active", !!active); }
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function getParams(){
+  const p = new URLSearchParams(window.location.search);
+  return { train: p.get("train") || "", guide: p.get("guide") || "", admin: p.get("admin") || "" };
+}
+function getTrainingURL(){
+  const adminInput = $("training_url") ? $("training_url").value.trim() : "";
+  if (adminInput !== "") return adminInput;
+  const u = PARAMS.train.trim();
+  if (u !== "") return u;
+  return DEFAULT_TRAIN_URL;
+}
+function getGuidelinesURL(){
+  const adminInput = $("guidelines_url") ? $("guidelines_url").value.trim() : "";
+  if (adminInput !== "") return adminInput;
+  const u = PARAMS.guide.trim();
+  if (u !== "") return u;
+  return DEFAULT_GUIDELINES_URL;
+}
+function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
+
+/* Normalize risk: accept 0–1 OR 0–100 */
+function normalizeRisk(raw){
+  const x = Number(raw);
+  if (!isFinite(x)) return NaN;
+  if (x > 1) return x / 100;
+  return x;
+}
+
+/* Group 1: binary uses internal cutoff (NOT displayed) */
+function aiBinaryLabel(risk){
+  if (!isFinite(risk)) return "—";
+  return (risk >= INTERNAL_BINARY_CUTOFF)
+    ? "Yes (will require reintubation within 48 hours)"
+    : "No (will NOT require reintubation within 48 hours)";
+}
+
+/* ===== Patient table ===== */
+function tagHtml(kind){
+  if (kind === "PASS") return '<span class="tag ok">PASS</span>';
+  if (kind === "FAIL") return '<span class="tag bad">FAIL</span>';
+  return '<span class="tag na">Not available</span>';
+}
+function safe(v){ return (v === null || v === undefined || String(v).trim() === "") ? "—" : String(v); }
+
+function buildCaseTableHTML(c){
+  if (!c) return '<div class="note">Error: case data not found.</div>';
+
+  const guideUrl = encodeURI(state.guidelinesURL || DEFAULT_GUIDELINES_URL);
+
+  return `
+    <table aria-label="Case data table">
+      <tr><th colspan="2">Patient demographics</th></tr>
+      <tr><td>Age</td><td>${safe(c.Age)}</td></tr>
+      <tr><td>Sex</td><td>${safe(c.Sex)}</td></tr>
+      <tr><td>Race</td><td>${safe(c.Race)}</td></tr>
+
+      <tr><th colspan="2">Pre-extubation snapshot variables</th></tr>
+      <tr><td>HR category</td><td>${safe(c.HR_category)}</td></tr>
+      <tr><td>RR</td><td>${safe(c.RR)}</td></tr>
+      <tr><td>Arterial pH</td><td>${safe(c.Arterial_pH)}</td></tr>
+      <tr><td>PaO₂/FiO₂</td><td>${safe(c.PaO2_FiO2)}</td></tr>
+      <tr><td>Hypercapnia</td><td>${safe(c.Hypercapnia)}</td></tr>
+      <tr><td>MAP category</td><td>${safe(c.MAP_category)}</td></tr>
+      <tr><td>RSBI</td><td>${safe(c.RSBI)}</td></tr>
+      <tr><td>qSOFA</td><td>${safe(c.qSOFA)}</td></tr>
+
+      <tr><th colspan="2">Durations</th></tr>
+      <tr><td>Mechanical ventilation duration (h)</td><td>${safe(c.MV_duration_h)}</td></tr>
+      <tr><td>ICU LOS (so far) (days)</td><td>${safe(c.ICU_LOS_days)}</td></tr>
+      <tr><td>ICU LOS (so far) (hours)</td><td>${safe(c.ICU_LOS_hours)}</td></tr>
+
+      <tr><th colspan="2">Eligibility checks</th></tr>
+      <tr><td>ICU time ≥ 4 hours</td><td>${tagHtml(c.ICU_time_ge4)}</td></tr>
+      <tr>
+        <td>
+          CTICU guideline extubation procedure
+          <span class="inlineLink">(<a href="${guideUrl}" target="_blank" rel="noopener">formal guidelines</a>)</span>
+        </td>
+        <td>${tagHtml("PASS")}</td>
+      </tr>
+    </table>
+  `;
+}
+
+/* ===========================
+   WEB3FORMS SUBMIT (with timeout)
+   =========================== */
+const SUBMIT_TIMEOUT_MS = 12000;
+
+async function submitRecord(payload){
+  const url = "https://api.web3forms.com/submit";
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "Accept":"application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        access_key: ACCESS_KEY,
+        from_name: "CTICU Survey",
+        subject: `CTICU Survey Submission — ${payload.group_id || "Group 1"}`,
+        botcheck: "",
+        ...payload
+      })
+    });
+
+    const json = await res.json().catch(() => ({}));
+    return {
+      ok: !!json.success,
+      status: res.status,
+      message: json.message || json.error || "Unknown response",
+      raw: json
+    };
+  } catch (e) {
+    const msg =
+      (e && e.name === "AbortError")
+        ? `Request timed out after ${Math.round(SUBMIT_TIMEOUT_MS/1000)}s`
+        : (e?.message || "Network error / blocked request");
+    return { ok:false, status:0, message: msg, raw:null };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/* ===========================
+   STATE
+   =========================== */
+const PARAMS = getParams();
+
+let state = {
+  started: false,
+  phase: 0,
+  phaseOrder: { 0: [], 1: [], 2: [], 3: [] },
+  idx: 0,
+  caseStartMs: 0,
+  trainingURL: DEFAULT_TRAIN_URL,
+  guidelinesURL: DEFAULT_GUIDELINES_URL
+};
+
+/* ===========================
+   ADMIN MODE
+   =========================== */
+(function adminMode(){
+  const isAdmin = (PARAMS.admin === "1");
+  $("adminSettings").classList.toggle("hidden", !isAdmin);
+  if (isAdmin){
+    if ($("training_url")) $("training_url").value = (PARAMS.train ? PARAMS.train : DEFAULT_TRAIN_URL);
+    if ($("guidelines_url")) $("guidelines_url").value = (PARAMS.guide ? PARAMS.guide : DEFAULT_GUIDELINES_URL);
+  }
+})();
+
+/* ===========================
+   MARKER RENDERING
+   =========================== */
+function setMarker(markerEl, labelEl, pct, text){
+  const p = Math.max(0, Math.min(100, pct));
+  markerEl.style.left = `${p}%`;
+  labelEl.style.left = `${p}%`;
+  labelEl.textContent = text;
+}
+
+/* ===========================
+   RENDERING
+   =========================== */
+function renderProgress(){
+  setPill("p0pill", state.phase === 0);
+  setPill("p1pill", state.phase === 1);
+  setPill("p2pill", state.phase === 2);
+  setPill("p3pill", state.phase === 3);
+  const totalInPhase = state.phaseOrder[state.phase].length;
+  $("casePill").textContent = `Case ${state.idx+1} / ${totalInPhase}`;
+}
+
+function renderPhaseHeader(){
+  if (state.phase === 0){
+    $("phaseTitle").textContent = "Phase 0 — No AI Support";
+    $("phaseIntro").innerHTML = "No AI support is shown in this phase.";
+  } else if (state.phase === 1){
+    $("phaseTitle").textContent = "Phase 1 — AI Support (Binary only)";
+    $("phaseIntro").innerHTML =
+      "You will see binary AI support only: the AI suggests <b>Yes</b> or <b>No</b> to the question of whether the patient will require <b>reintubation within 48 hours</b>. No probability is shown.";
+  } else if (state.phase === 2){
+    $("phaseTitle").textContent = "Phase 2 — AI Support (Binary + Risk)";
+    const safeUrl = encodeURI(state.trainingURL);
+    $("phaseIntro").innerHTML = `Please review the training document before answering these cases:
+      <a href="${safeUrl}" target="_blank" rel="noopener"><b>Open training document (PDF)</b></a>.`;
+  } else {
+    $("phaseTitle").textContent = "Phase 3 — AI Support (Binary + Risk)";
+    $("phaseIntro").innerHTML = "Same AI support format as Phase 2 (binary + risk).";
+  }
+
+  $("status").textContent =
+    state.phase === 0 ? "Phase 0: No AI support." :
+    state.phase === 1 ? "Phase 1: Binary AI support only." :
+                        "Phase 2/3: Binary + probability support (no threshold).";
+}
+
+function clearYesNo(){
+  document.querySelectorAll('input[name="human_reintubation_prediction"]').forEach(r => r.checked = false);
+}
+function getYesNo(){
+  const r = document.querySelector('input[name="human_reintubation_prediction"]:checked');
+  return r ? r.value : "";
+}
+
+function renderCurrentCase(){
+  renderProgress();
+  renderPhaseHeader();
+
+  const id = state.phaseOrder[state.phase][state.idx];
+  const c = CASES[id];
+
+  // Bar shown only in Phase 2 & 3
+  $("aiBarWrap").classList.toggle("hidden", (state.phase === 0 || state.phase === 1));
+  $("aiBinaryRow").classList.toggle("hidden", state.phase === 0);
+
+  if (!c){
+    $("caseHeader").textContent = "Case —";
+    $("caseTableWrap").innerHTML = '<div class="note">Error: case data not found.</div>';
+    $("aiSupportBinary").textContent = "—";
+    $("aiPanel").classList.add("hidden");
+    $("aiReadout").textContent = "AI: —";
+    ["aiMarker","aiMarkerLabel"].forEach(x => $(x).classList.add("hidden"));
+    return;
+  }
+
+  $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
+  $("caseTableWrap").innerHTML = buildCaseTableHTML(c);
+
+  const risk = normalizeRisk(c.pred_score);
+  const showProb = (state.phase === 2 || state.phase === 3);
+
+  // AI support label (binary shown in Phase 1–3)
+  $("aiSupportBinary").textContent = (state.phase === 0) ? "—" : aiBinaryLabel(risk);
+
+  // Probability panel shown only in Phase 2–3 (no threshold)
+  $("aiPanel").classList.toggle("hidden", !showProb);
+  $("aiRiskLabel").textContent = showProb && isFinite(risk)
+    ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`)
+    : "—";
+
+  // Marker (AI only)
+  const aiMarker = $("aiMarker");
+  const aiMarkerLabel = $("aiMarkerLabel");
+
+  if (state.phase === 0){
+    $("aiReadout").textContent = "AI: none";
+    aiMarker.classList.add("hidden"); aiMarkerLabel.classList.add("hidden");
+  } else {
+    if (showProb && isFinite(risk)){
+      const riskPct = risk * 100;
+      aiMarker.classList.remove("hidden"); aiMarkerLabel.classList.remove("hidden");
+      setMarker(aiMarker, aiMarkerLabel, riskPct, `AI risk ${Math.round(riskPct)}%`);
+      $("aiReadout").textContent = `AI: ${Math.round(riskPct)}% (${aiBinaryLabel(risk)})`;
+    } else {
+      aiMarker.classList.add("hidden"); aiMarkerLabel.classList.add("hidden");
+      $("aiReadout").textContent = `AI: ${aiBinaryLabel(risk)}`;
+    }
+  }
+
+  clearYesNo();
+  $("rationale").value = "";
+  $("msg").textContent = "";
+  state.caseStartMs = Date.now();
+}
+
+/* ===========================
+   UI SHOW/HIDE
+   =========================== */
+function showOnly(elId){
+  ["setupCard","progressCard","caseCard","doneCard"].forEach(id => {
+    $(id).classList.toggle("hidden", id !== elId);
+  });
+}
+function showMain(){
+  $("progressCard").classList.remove("hidden");
+  $("caseCard").classList.remove("hidden");
+  $("doneCard").classList.add("hidden");
+}
+
+/* ===========================
+   START
+   =========================== */
+$("startBtn").addEventListener("click", () => {
+  const did = $("doctor_id").value.trim();
+  if (!did){
+    $("setupMsg").innerHTML = '<span class="warn">Doctor ID is required.</span>';
+    return;
+  }
+
+  state.trainingURL = getTrainingURL();
+  state.guidelinesURL = getGuidelinesURL();
+
+  state.phaseOrder[0] = shuffle(PHASE0_IDS);
+  state.phaseOrder[1] = shuffle(PHASE1_IDS);
+  state.phaseOrder[2] = shuffle(PHASE2_IDS);
+  state.phaseOrder[3] = shuffle(PHASE3_IDS);
+
+  state.phase = 0;
+  state.idx = 0;
+  state.started = true;
+
+  $("setupMsg").textContent = "";
+  showMain();
+  renderCurrentCase();
+});
+
+/* ===========================
+   SUBMIT CASE RECORD
+   =========================== */
+async function handleCaseSubmit(isSkip){
+  $("submitBtn").disabled = true;
+  $("skipBtn").disabled = true;
+  $("msg").textContent = "Submitting…";
+
+  const id = state.phaseOrder[state.phase][state.idx];
+  const c = CASES[id];
+  const now = Date.now();
+  const time_seconds = Math.max(0, Math.round((now - state.caseStartMs)/1000));
+
+  const doctor_id = $("doctor_id").value.trim();
+  const specialty = $("specialty").value.trim();
+  const years_exp = $("years_exp").value.trim();
+  const group_id = $("group_id").value.trim();
+
+  let human_reintubation_prediction = "";
+  let rationale = "";
+
+  if (!isSkip){
+    human_reintubation_prediction = getYesNo();
+    rationale = $("rationale").value.trim();
+  }
+
+  const risk = c ? normalizeRisk(c.pred_score) : NaN;
+  const showProb = (state.phase === 2 || state.phase === 3);
+
+  const payload = {
+    submission_id: makeSubmissionId(),
+    doctor_id, specialty, years_exp, group_id,
+    phase: state.phase,
+    phase_case_index: state.idx + 1,
+    encounter_id: c ? c.encounterId : "",
+
+    ai_support_present: (state.phase === 0) ? "no" : "yes",
+    ai_support_type:
+      (state.phase === 0) ? "none" :
+      (state.phase === 1) ? "binary_only" :
+      "binary_plus_risk",
+
+    ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk),
+
+    // AI risk of REINTUBATION within 48h
+    risk_score_shown: (showProb && c && isFinite(risk)) ? risk.toFixed(6) : "",
+    risk_percent_shown: (showProb && c && isFinite(risk)) ? String(Math.round(risk*100)) : "",
+    threshold_shown: "",
+
+    human_reintubation_prediction,
+    rationale,
+    time_seconds
+  };
+
+  // Store patient fields (now includes ICU_LOS_hours)
+  if (c){
+    Object.assign(payload, {
+      Age: c.Age, Sex: c.Sex, Race: c.Race,
+      HR_category: c.HR_category,
+      RR: c.RR,
+      Arterial_pH: c.Arterial_pH,
+      PaO2_FiO2: c.PaO2_FiO2,
+      Hypercapnia: c.Hypercapnia,
+      MAP_category: c.MAP_category,
+      RSBI: c.RSBI,
+      qSOFA: c.qSOFA,
+      MV_duration_h: c.MV_duration_h,
+      ICU_LOS_days: c.ICU_LOS_days,
+      ICU_LOS_hours: c.ICU_LOS_hours,
+      ICU_time_ge4: c.ICU_time_ge4,
+      LOS_gt_MV: c.LOS_gt_MV,
+
+      // always PASS (no details)
+      CTICU_extubation_procedure: "PASS",
+      CTICU_guidelines_url: state.guidelinesURL
+    });
+  }
+
+  const result = await submitRecord(payload);
+
+  if (!result.ok){
+    $("msg").innerHTML =
+      `<span class="warn">Submission failed.</span> ` +
+      `(${result.status || "no status"}) ${result.message}`;
+    $("submitBtn").disabled = false;
+    $("skipBtn").disabled = false;
+    return;
+  }
+
+  $("msg").innerHTML = '<span class="success">Saved.</span>';
+  setTimeout(() => advance(), 250);
+}
+
+function advance(){
+  $("submitBtn").disabled = false;
+  $("skipBtn").disabled = false;
+
+  const total = state.phaseOrder[state.phase].length;
+  if (state.idx < total - 1){
+    state.idx += 1;
+    renderCurrentCase();
+    return;
+  }
+
+  if (state.phase === 0){ state.phase = 1; state.idx = 0; renderCurrentCase(); return; }
+  if (state.phase === 1){ state.phase = 2; state.idx = 0; renderCurrentCase(); return; }
+  if (state.phase === 2){ state.phase = 3; state.idx = 0; renderCurrentCase(); return; }
+
+  $("caseCard").classList.add("hidden");
+  $("doneCard").classList.remove("hidden");
+  $("status").innerHTML = '<span class="success">All phases completed.</span> Thank you!';
+}
+
+/* ===========================
+   EVENTS
+   =========================== */
+$("answerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const yn = getYesNo();
+  if (!yn){
+    $("msg").innerHTML = '<span class="warn">Please select Yes or No before submitting.</span>';
+    return;
+  }
+  await handleCaseSubmit(false);
+});
+$("skipBtn").addEventListener("click", async () => {
+  await handleCaseSubmit(true);
+});
+
+/* ===========================
+   RESET
+   =========================== */
+$("resetBtn").addEventListener("click", () => {
+  state.started = false;
+  state.phase = 0;
+  state.idx = 0;
+  state.phaseOrder[0] = [];
+  state.phaseOrder[1] = [];
+  state.phaseOrder[2] = [];
+  state.phaseOrder[3] = [];
+  $("setupMsg").textContent = "";
+  showOnly("setupCard");
+});
+
+/* ===========================
+   INITIAL VIEW
+   =========================== */
+showOnly("setupCard");
+</script>
+</body>
+</html>
