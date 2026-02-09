@@ -293,9 +293,6 @@ const PHASE3_IDS = [830];
 
 /* ===========================
    CASE DATA (UPDATED)
-   - Includes ICU_LOS_hours and ICU_LOS_days
-   - Procedure eligibility is always PASS (not detailed)
-   - AI prob: random-ish fixed values (pred_score 0–100)
    =========================== */
 const CASES = {
   28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,        ICU_LOS_days:0.611689815, ICU_LOS_hours:14.68055556,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:71 },
@@ -305,35 +302,8 @@ const CASES = {
   215: { encounterId:215, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.25,        ICU_LOS_days:1.397303241, ICU_LOS_hours:33.53527778,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:18 },
   218: { encounterId:218, Age:65, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:11.5,        ICU_LOS_days:0.599421296, ICU_LOS_hours:14.38611111,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:55 },
   278: { encounterId:278, Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:19,          ICU_LOS_days:1.75724537,  ICU_LOS_hours:42.17388889,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:64 },
-  279: { encounterId:279, Age:77, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:151.15,      ICU_LOS_days:6.726284722, ICU_LOS_hours:161.4308333,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:29 },
-  285: { encounterId:285, Age:51, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8.5,         ICU_LOS_days:0.551423611, ICU_LOS_hours:13.23416667,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:41 },
-  296: { encounterId:296, Age:61, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,           ICU_LOS_days:0.433287037, ICU_LOS_hours:10.39888889,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:52 },
-  301: { encounterId:301, Age:49, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:17.35,       ICU_LOS_days:0.870243056, ICU_LOS_hours:20.88583333,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:66 },
-  341: { encounterId:341, Age:69, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.25,        ICU_LOS_days:0.791018519, ICU_LOS_hours:18.98444444,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:37 },
-  378: { encounterId:378, Age:52, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:7.5,         ICU_LOS_days:0.507372685, ICU_LOS_hours:12.17694444,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:58 },
   438: { encounterId:438, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17,          ICU_LOS_days:0.773333333, ICU_LOS_hours:18.56,        ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:73 },
-  459: { encounterId:459, Age:75, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:2.25,        ICU_LOS_days:0.193599537, ICU_LOS_hours:4.646388889,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:21 },
-  494: { encounterId:494, Age:55, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:6.75,        ICU_LOS_days:1.0146875,   ICU_LOS_hours:24.3525,     ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:49 },
-  498: { encounterId:498, Age:56, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.916666667, ICU_LOS_days:0.393634259, ICU_LOS_hours:9.447222222,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:57 },
-  608: { encounterId:608, Age:48, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,        ICU_LOS_days:0.698136574, ICU_LOS_hours:16.75527778,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:63 },
-  728: { encounterId:728, Age:57, Sex:"Male",   Race:"Indian",  HR_category:">100",   RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.5,         ICU_LOS_days:0.46869213,  ICU_LOS_hours:11.24861111,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:44 },
-  795: { encounterId:795, Age:47, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:8.5,         ICU_LOS_days:0.424363426, ICU_LOS_hours:10.18472222,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:31 },
-  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_LOS_hours:17.22388889,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:39 },
-  839: { encounterId:839, Age:72, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8,           ICU_LOS_days:2.223090278, ICU_LOS_hours:53.35416667,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:28 },
-  859: { encounterId:859, Age:73, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:25.75,       ICU_LOS_days:1.181168981, ICU_LOS_hours:28.34805556,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:61 },
-  920: { encounterId:920, Age:65, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17.03333333, ICU_LOS_days:1.191493056, ICU_LOS_hours:28.59583333,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:46 },
-  945: { encounterId:945, Age:45, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:11,          ICU_LOS_days:0.565555556, ICU_LOS_hours:13.57333333,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:53 },
-  1009:{ encounterId:1009,Age:63, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:5.25,        ICU_LOS_days:0.406944444, ICU_LOS_hours:9.766666667,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:24 },
-  1045:{ encounterId:1045,Age:51, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:10.83333333, ICU_LOS_days:0.704236111, ICU_LOS_hours:16.90166667,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:59 },
-  1092:{ encounterId:1092,Age:65, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.083333333, ICU_LOS_days:0.328229167, ICU_LOS_hours:7.8775,      ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:33 },
-  1095:{ encounterId:1095,Age:63, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:9.666666667, ICU_LOS_days:0.609918981, ICU_LOS_hours:14.63805556,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:48 },
-  1101:{ encounterId:1101,Age:54, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:6.866666667, ICU_LOS_days:0.635983796, ICU_LOS_hours:15.26361111,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:57 },
-  1171:{ encounterId:1171,Age:55, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:9.5,         ICU_LOS_days:0.547453704, ICU_LOS_hours:13.13888889,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:36 },
-  1205:{ encounterId:1205,Age:44, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:8.583333333, ICU_LOS_days:0.673865741, ICU_LOS_hours:16.17277778,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:62 },
-  1235:{ encounterId:1235,Age:72, Sex:"Male",   Race:"Chinese", HR_category:"<60",    RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,           ICU_LOS_days:0.292962963, ICU_LOS_hours:7.031111111,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:22 },
-  1291:{ encounterId:1291,Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:7,           ICU_LOS_days:0.506956019, ICU_LOS_hours:12.16694444,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:51 },
-  1321:{ encounterId:1321,Age:73, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.75,        ICU_LOS_days:0.420196759, ICU_LOS_hours:10.08472222,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:40 },
-  1335:{ encounterId:1335,Age:53, Sex:"Male",   Race:"Malay",   HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:5.75,        ICU_LOS_days:0.416736111, ICU_LOS_hours:10.00166667,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:27 }
+  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_LOS_hours:17.22388889,  ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:39 }
 };
 
 /* ===========================
@@ -431,11 +401,24 @@ function buildCaseTableHTML(c){
 }
 
 /* ===========================
-   WEB3FORMS SUBMIT (with timeout)
+   WEB3FORMS SUBMIT (improved)
    =========================== */
-const SUBMIT_TIMEOUT_MS = 12000;
+const SUBMIT_TIMEOUT_MS = 15000;
+const SUBMIT_RETRY_ON_NETWORK = 1;
 
-async function submitRecord(payload){
+function envHints(){
+  const hints = [];
+  if (window.location.protocol === "file:"){
+    hints.push("You are opening this page as file://. Many browsers block cross-origin requests from file://. Use GitHub Pages or run a local server (http://localhost).");
+  }
+  if (!window.isSecureContext){
+    // http://localhost is still considered secure context in many cases, but not always
+    hints.push("This page is not in a secure context. Prefer https:// (or http://localhost) to avoid request blocking.");
+  }
+  return hints;
+}
+
+async function submitRecordOnce(payload){
   const url = "https://api.web3forms.com/submit";
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
@@ -443,6 +426,10 @@ async function submitRecord(payload){
   try {
     const res = await fetch(url, {
       method: "POST",
+      mode: "cors",
+      cache: "no-store",
+      credentials: "omit",
+      redirect: "follow",
       headers: { "Content-Type":"application/json", "Accept":"application/json" },
       signal: controller.signal,
       body: JSON.stringify({
@@ -450,15 +437,20 @@ async function submitRecord(payload){
         from_name: "CTICU Survey",
         subject: `CTICU Survey Submission — ${payload.group_id || "Group 1"}`,
         botcheck: "",
+        // helpful metadata
+        page_url: window.location.href,
+        origin: window.location.origin,
         ...payload
       })
     });
 
     const json = await res.json().catch(() => ({}));
+    const ok = !!(res.ok && json && json.success);
+
     return {
-      ok: !!json.success,
+      ok,
       status: res.status,
-      message: json.message || json.error || "Unknown response",
+      message: json.message || json.error || (res.ok ? "Unknown response" : "HTTP error"),
       raw: json
     };
   } catch (e) {
@@ -470,6 +462,19 @@ async function submitRecord(payload){
   } finally {
     clearTimeout(t);
   }
+}
+
+async function submitRecord(payload){
+  let last = null;
+  for (let attempt = 0; attempt <= SUBMIT_RETRY_ON_NETWORK; attempt++){
+    last = await submitRecordOnce(payload);
+    if (last.ok) return last;
+
+    // retry only on true network-level failures
+    const networky = (last.status === 0);
+    if (!networky) break;
+  }
+  return last;
 }
 
 /* ===========================
@@ -636,6 +641,15 @@ $("startBtn").addEventListener("click", () => {
     return;
   }
 
+  // Warn about file:// which commonly causes failures
+  const hints = envHints();
+  if (hints.length){
+    $("setupMsg").innerHTML = `<span class="warn">${hints.join(" ")}</span>`;
+    // still allow starting; just warning
+  } else {
+    $("setupMsg").textContent = "";
+  }
+
   state.trainingURL = getTrainingURL();
 
   state.phaseOrder[0] = shuffle(PHASE0_IDS);
@@ -647,7 +661,6 @@ $("startBtn").addEventListener("click", () => {
   state.idx = 0;
   state.started = true;
 
-  $("setupMsg").textContent = "";
   showMain();
   renderCurrentCase();
 });
@@ -733,9 +746,17 @@ async function handleCaseSubmit(isSkip){
   const result = await submitRecord(payload);
 
   if (!result.ok){
+    const hints = [];
+    if (result.status === 0){
+      hints.push("Likely blocked by browser/CORS or file://. Use https (GitHub Pages) or http://localhost.");
+    } else if (result.status === 401 || result.status === 403){
+      hints.push("Access key or domain restriction issue in Web3Forms settings (add your domain).");
+    }
     $("msg").innerHTML =
       `<span class="warn">Submission failed.</span> ` +
-      `(${result.status || "no status"}) ${result.message}`;
+      `(${result.status || "no status"}) ${result.message}` +
+      (hints.length ? `<div class="small" style="margin-top:6px;">${hints.join(" ")}</div>` : "");
+
     $("submitBtn").disabled = false;
     $("skipBtn").disabled = false;
     return;
