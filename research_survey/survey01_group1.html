@@ -282,65 +282,119 @@
    =========================== */
 const ACCESS_KEY = "7995a7eb-0ff4-4e0c-8e18-d0a12db2ddc9";
 const DEFAULT_TRAIN_URL = "https://www.dropbox.com/scl/fi/tue9k0lyb26zpaycjxy25/slides-draft.pdf?rlkey=7z9qjtbhch5ffgcff8g0wngwx&dl=0";
-
-/* NEW: Formal guidelines link (used in Eligibility section) */
-const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.pdf"; // <-- replace if you want
-
-// Internal cutoff for binary AI label (NOT shown to participants)
+const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.pdf"; // replace if needed
 const INTERNAL_BINARY_CUTOFF = 0.5;
 
-/* ===== Cohort phases (unchanged) ===== */
+/* ===== SAME patients as Group 0 (your new dataset) ===== */
 const PHASE0_IDS = [28];
-const PHASE1_IDS = [278];
-const PHASE2_IDS = [438];
-const PHASE3_IDS = [830];
+const PHASE1_IDS = [67];
+const PHASE2_IDS = [89];
+const PHASE3_IDS = [94, 158];
 
-/* === UPDATED CASES (new patient values + ICU LOS hours) ===
-   Schema:
-   { encounterId, Age, Sex, Race, HR_category, RR, Arterial_pH, PaO2_FiO2, Hypercapnia, MAP_category,
-     RSBI, qSOFA, MV_duration_h, ICU_LOS_days, ICU_LOS_hours, ICU_time_ge4, LOS_gt_MV, pred_score }
-   Notes:
-   - "CTICU guideline extubation procedure" is shown as PASS for ALL patients (no criteria detail).
-   - pred_score values are RANDOM-looking placeholders (0–100) as requested.
-*/
+/* ===========================
+   CASES (doctor-provided columns only)
+   =========================== */
 const CASES = {
-  28:  { encounterId:28,  Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.5,         ICU_LOS_days:0.611689815, ICU_LOS_hours:14.68055556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:69 },
-  67:  { encounterId:67,  Age:56, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:36.41666667, ICU_LOS_days:1.518726852, ICU_LOS_hours:36.44944444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:41 },
-  89:  { encounterId:89,  Age:51, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:11.25,        ICU_LOS_days:0.655543981, ICU_LOS_hours:15.73305556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:77 },
-  158: { encounterId:158, Age:25, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,         ICU_LOS_days:0.744097222, ICU_LOS_hours:17.85833333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:33 },
-  215: { encounterId:215, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.25,         ICU_LOS_days:1.397303241, ICU_LOS_hours:33.53527778, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:52 },
-  218: { encounterId:218, Age:65, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:11.5,         ICU_LOS_days:0.599421296, ICU_LOS_hours:14.38611111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:64 },
-  278: { encounterId:278, Age:66, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:19,           ICU_LOS_days:1.75724537,  ICU_LOS_hours:42.17388889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:58 },
-  279: { encounterId:279, Age:77, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:151.15,       ICU_LOS_days:6.726284722, ICU_LOS_hours:161.4308333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:21 },
-  285: { encounterId:285, Age:51, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8.5,          ICU_LOS_days:0.551423611, ICU_LOS_hours:13.23416667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:47 },
-  296: { encounterId:296, Age:61, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,            ICU_LOS_days:0.433287037, ICU_LOS_hours:10.39888889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:55 },
-  301: { encounterId:301, Age:49, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:17.35,        ICU_LOS_days:0.870243056, ICU_LOS_hours:20.88583333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:73 },
-  341: { encounterId:341, Age:69, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.25,         ICU_LOS_days:0.791018519, ICU_LOS_hours:18.98444444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:19 },
-  378: { encounterId:378, Age:52, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:7.5,          ICU_LOS_days:0.507372685, ICU_LOS_hours:12.17694444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:61 },
-  438: { encounterId:438, Age:60, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17,           ICU_LOS_days:0.773333333, ICU_LOS_hours:18.56,       ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:60 },
-  459: { encounterId:459, Age:75, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:2.25,         ICU_LOS_days:0.193599537, ICU_LOS_hours:4.646388889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:12 },
-  494: { encounterId:494, Age:55, Sex:"Female", Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:6.75,         ICU_LOS_days:1.0146875,   ICU_LOS_hours:24.3525,    ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:49 },
-  498: { encounterId:498, Age:56, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.916666667, ICU_LOS_days:0.393634259, ICU_LOS_hours:9.447222222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:67 },
-  608: { encounterId:608, Age:48, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:14.5,         ICU_LOS_days:0.698136574, ICU_LOS_hours:16.75527778, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:82 },
-  728: { encounterId:728, Age:57, Sex:"Male",   Race:"Indian",  HR_category:">100",   RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:6.5,          ICU_LOS_days:0.46869213,  ICU_LOS_hours:11.24861111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:38 },
-  795: { encounterId:795, Age:47, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:8.5,          ICU_LOS_days:0.424363426, ICU_LOS_hours:10.18472222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:44 },
-  830: { encounterId:830, Age:46, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:10.33333333, ICU_LOS_days:0.717662037, ICU_LOS_hours:17.22388889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:39 },
-  839: { encounterId:839, Age:72, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:8,            ICU_LOS_days:2.223090278, ICU_LOS_hours:53.35416667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:57 },
-  859: { encounterId:859, Age:73, Sex:"Female", Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"<7.35",     PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:25.75,        ICU_LOS_days:1.181168981, ICU_LOS_hours:28.34805556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:70 },
-  920: { encounterId:920, Age:65, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:17.03333333, ICU_LOS_days:1.191493056, ICU_LOS_hours:28.59583333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:28 },
-  945: { encounterId:945, Age:45, Sex:"Male",   Race:"Malay",   HR_category:"60-100", RR:">20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:11,           ICU_LOS_days:0.565555556, ICU_LOS_hours:13.57333333, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:63 },
-  1009:{ encounterId:1009,Age:63, Sex:"Male",   Race:"Indian",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:2, MV_duration_h:5.25,         ICU_LOS_days:0.406944444, ICU_LOS_hours:9.766666667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:46 },
-  1045:{ encounterId:1045,Age:51, Sex:"Male",   Race:"Others",  HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:10.83333333, ICU_LOS_days:0.704236111, ICU_LOS_hours:16.90166667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:54 },
-
-  1092:{ encounterId:1092,Age:65, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:7.083333333, ICU_LOS_days:0.328229167, ICU_LOS_hours:7.8775,      ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:36 },
-  1095:{ encounterId:1095,Age:63, Sex:"Male",   Race:"Chinese", HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:9.666666667, ICU_LOS_days:0.609918981, ICU_LOS_hours:14.63805556, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:59 },
-  1101:{ encounterId:1101,Age:54, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:6.866666667, ICU_LOS_days:0.635983796, ICU_LOS_hours:15.26361111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:48 },
-  1171:{ encounterId:1171,Age:55, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:">7.45",     PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:9.5,          ICU_LOS_days:0.547453704, ICU_LOS_hours:13.13888889, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:31 },
-  1205:{ encounterId:1205,Age:44, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"Yes", MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:8.583333333, ICU_LOS_days:0.673865741, ICU_LOS_hours:16.17277778, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:66 },
-  1235:{ encounterId:1235,Age:72, Sex:"Male",   Race:"Chinese", HR_category:"<60",    RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:1, MV_duration_h:7,            ICU_LOS_days:0.292962963, ICU_LOS_hours:7.031111111, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:27 },
-  1291:{ encounterId:1291,Age:64, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"No",  MAP_category:"<70",    RSBI:"", qSOFA:2, MV_duration_h:7,            ICU_LOS_days:0.506956019, ICU_LOS_hours:12.16694444, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:53 },
-  1321:{ encounterId:1321,Age:73, Sex:"Male",   Race:"Chinese", HR_category:"60-100", RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"≥300", Hypercapnia:"Yes", MAP_category:"70-105", RSBI:"", qSOFA:0, MV_duration_h:7.75,         ICU_LOS_days:0.420196759, ICU_LOS_hours:10.08472222, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:18 },
-  1335:{ encounterId:1335,Age:53, Sex:"Male",   Race:"Malay",   HR_category:">100",   RR:"≤20", Arterial_pH:"7.35-7.45", PaO2_FiO2:"<300", Hypercapnia:"No",  MAP_category:"70-105", RSBI:"", qSOFA:1, MV_duration_h:5.75,         ICU_LOS_days:0.416736111, ICU_LOS_hours:10.00166667, ICU_time_ge4:"PASS", LOS_gt_MV:"PASS", pred_score:62 }
+  28: {
+    encounterId: 28,
+    Age: 64, Sex: "Male", Race: "Chinese",
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=87)",
+    CARDIO_MAP: "70-105 (MAP=84)",
+    CARDIO_qSOFA: "1 (RR=24, SBP=145, GCS=15)",
+    VENT_RR: ">20 (RR=24)",
+    VENT_FiO2: "0.4",
+    ABG_pH: "7.35-7.45 (pH=7.37)",
+    ABG_PF: "≥300 (PaO2=189, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "No (PaCO2=37 mmHg)",
+    ABG_RSBI: "",
+    MV_duration_h: 7.5,
+    ICU_LOS_days: 0.611689815,
+    ICU_LOS_hours: 14.68055556,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+    pred_score: 69
+  },
+  67: {
+    encounterId: 67,
+    Age: 56, Sex: "Female", Race: "Malay",
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=82)",
+    CARDIO_MAP: "70-105 (MAP=74)",
+    CARDIO_qSOFA: "0 (RR=12, SBP=110, GCS=15)",
+    VENT_RR: "≤20 (RR=12)",
+    VENT_FiO2: "0.3",
+    ABG_pH: "7.35-7.45 (pH=7.39)",
+    ABG_PF: "<300 (PaO2=42, FiO2=0.30)",
+    ABG_PaCO2_Hypercapnia: "Yes (PaCO2=52 mmHg)",
+    ABG_RSBI: "",
+    MV_duration_h: 36.41666667,
+    ICU_LOS_days: 1.518726852,
+    ICU_LOS_hours: 36.44944444,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+    pred_score: 41
+  },
+  89: {
+    encounterId: 89,
+    Age: 51, Sex: "Male", Race: "Malay",
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=88)",
+    CARDIO_MAP: "70-105 (MAP=77)",
+    CARDIO_qSOFA: "1 (RR=16, SBP=114, GCS=10)",
+    VENT_RR: "≤20 (RR=16)",
+    VENT_FiO2: "0.4",
+    ABG_pH: "<7.35 (pH=7.32)",
+    ABG_PF: "<300 (PaO2=113, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "Yes (PaCO2=47 mmHg)",
+    ABG_RSBI: "",
+    MV_duration_h: 11.25,
+    ICU_LOS_days: 0.655543981,
+    ICU_LOS_hours: 15.73305556,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+    pred_score: 77
+  },
+  94: {
+    encounterId: 94,
+    Age: 66, Sex: "Male", Race: "Chinese",
+    CARDIO_VasoactiveProxy: "Yes (n_agents=1)",
+    CARDIO_HR: "60-100 (HR=88)",
+    CARDIO_MAP: "70-105 (MAP=71)",
+    CARDIO_qSOFA: "2 (RR=17, SBP=92, GCS=11)",
+    VENT_RR: "≤20 (RR=17)",
+    VENT_FiO2: "0.4",
+    ABG_pH: "7.35-7.45 (pH=7.40)",
+    ABG_PF: "≥300 (PaO2=153, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "No (PaCO2=40 mmHg)",
+    ABG_RSBI: "",
+    MV_duration_h: 19,
+    ICU_LOS_days: 0.775405093,
+    ICU_LOS_hours: 18.60972222,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "FAIL",
+    pred_score: 52
+  },
+  158: {
+    encounterId: 158,
+    Age: 25, Sex: "Female", Race: "Malay",
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=96)",
+    CARDIO_MAP: "<70 (MAP=68)",
+    CARDIO_qSOFA: "2 (RR=20, SBP=100, GCS=11)",
+    VENT_RR: "≤20 (RR=20)",
+    VENT_FiO2: "0.4",
+    ABG_pH: "7.35-7.45 (pH=7.41)",
+    ABG_PF: "≥300 (PaO2=166, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "No (PaCO2=39 mmHg)",
+    ABG_RSBI: "",
+    MV_duration_h: 14.5,
+    ICU_LOS_days: 0.744097222,
+    ICU_LOS_hours: 17.85833333,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+    pred_score: 33
+  }
 };
 
 /* ===========================
@@ -375,34 +429,31 @@ function getGuidelinesURL(){
   return DEFAULT_GUIDELINES_URL;
 }
 function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
+function safe(v){ return (v === null || v === undefined || String(v).trim() === "") ? "—" : String(v); }
 
-/* Normalize risk: accept 0–1 OR 0–100 */
 function normalizeRisk(raw){
   const x = Number(raw);
   if (!isFinite(x)) return NaN;
   if (x > 1) return x / 100;
   return x;
 }
-
-/* Group 1: binary uses internal cutoff (NOT displayed) */
 function aiBinaryLabel(risk){
   if (!isFinite(risk)) return "—";
   return (risk >= INTERNAL_BINARY_CUTOFF)
     ? "Yes (will require reintubation within 48 hours)"
     : "No (will NOT require reintubation within 48 hours)";
 }
-
-/* ===== Patient table ===== */
 function tagHtml(kind){
   if (kind === "PASS") return '<span class="tag ok">PASS</span>';
   if (kind === "FAIL") return '<span class="tag bad">FAIL</span>';
   return '<span class="tag na">Not available</span>';
 }
-function safe(v){ return (v === null || v === undefined || String(v).trim() === "") ? "—" : String(v); }
 
+/* ===========================
+   PATIENT TABLE (doctor fields only)
+   =========================== */
 function buildCaseTableHTML(c){
   if (!c) return '<div class="note">Error: case data not found.</div>';
-
   const guideUrl = encodeURI(state.guidelinesURL || DEFAULT_GUIDELINES_URL);
 
   return `
@@ -412,15 +463,21 @@ function buildCaseTableHTML(c){
       <tr><td>Sex</td><td>${safe(c.Sex)}</td></tr>
       <tr><td>Race</td><td>${safe(c.Race)}</td></tr>
 
-      <tr><th colspan="2">Pre-extubation snapshot variables</th></tr>
-      <tr><td>HR category</td><td>${safe(c.HR_category)}</td></tr>
-      <tr><td>RR</td><td>${safe(c.RR)}</td></tr>
-      <tr><td>Arterial pH</td><td>${safe(c.Arterial_pH)}</td></tr>
-      <tr><td>PaO₂/FiO₂</td><td>${safe(c.PaO2_FiO2)}</td></tr>
-      <tr><td>Hypercapnia</td><td>${safe(c.Hypercapnia)}</td></tr>
-      <tr><td>MAP category</td><td>${safe(c.MAP_category)}</td></tr>
-      <tr><td>RSBI</td><td>${safe(c.RSBI)}</td></tr>
-      <tr><td>qSOFA</td><td>${safe(c.qSOFA)}</td></tr>
+      <tr><th colspan="2">CARDIOVASCULAR</th></tr>
+      <tr><td>Vasoactive use (proxy)</td><td>${safe(c.CARDIO_VasoactiveProxy)}</td></tr>
+      <tr><td>HR</td><td>${safe(c.CARDIO_HR)}</td></tr>
+      <tr><td>MAP</td><td>${safe(c.CARDIO_MAP)}</td></tr>
+      <tr><td>qSOFA</td><td>${safe(c.CARDIO_qSOFA)}</td></tr>
+
+      <tr><th colspan="2">VENTILATOR SETTINGS</th></tr>
+      <tr><td>RR</td><td>${safe(c.VENT_RR)}</td></tr>
+      <tr><td>FiO₂</td><td>${safe(c.VENT_FiO2)}</td></tr>
+
+      <tr><th colspan="2">ARTERIAL BLOOD GAS</th></tr>
+      <tr><td>Arterial pH</td><td>${safe(c.ABG_pH)}</td></tr>
+      <tr><td>PaO₂/FiO₂</td><td>${safe(c.ABG_PF)}</td></tr>
+      <tr><td>PaCO₂ / Hypercapnia</td><td>${safe(c.ABG_PaCO2_Hypercapnia)}</td></tr>
+      <tr><td>RSBI</td><td>${safe(c.ABG_RSBI)}</td></tr>
 
       <tr><th colspan="2">Durations</th></tr>
       <tr><td>Mechanical ventilation duration (h)</td><td>${safe(c.MV_duration_h)}</td></tr>
@@ -429,6 +486,7 @@ function buildCaseTableHTML(c){
 
       <tr><th colspan="2">Eligibility checks</th></tr>
       <tr><td>ICU time ≥ 4 hours</td><td>${tagHtml(c.ICU_time_ge4)}</td></tr>
+      <tr><td>LOS &gt; MV duration</td><td>${tagHtml(c.LOS_gt_MV)}</td></tr>
       <tr>
         <td>
           CTICU guideline extubation procedure
@@ -570,7 +628,6 @@ function renderCurrentCase(){
   const id = state.phaseOrder[state.phase][state.idx];
   const c = CASES[id];
 
-  // Bar shown only in Phase 2 & 3
   $("aiBarWrap").classList.toggle("hidden", (state.phase === 0 || state.phase === 1));
   $("aiBinaryRow").classList.toggle("hidden", state.phase === 0);
 
@@ -590,16 +647,13 @@ function renderCurrentCase(){
   const risk = normalizeRisk(c.pred_score);
   const showProb = (state.phase === 2 || state.phase === 3);
 
-  // AI support label (binary shown in Phase 1–3)
   $("aiSupportBinary").textContent = (state.phase === 0) ? "—" : aiBinaryLabel(risk);
 
-  // Probability panel shown only in Phase 2–3 (no threshold)
   $("aiPanel").classList.toggle("hidden", !showProb);
   $("aiRiskLabel").textContent = showProb && isFinite(risk)
     ? (risk.toFixed(3) + ` (${Math.round(risk*100)}%)`)
     : "—";
 
-  // Marker (AI only)
   const aiMarker = $("aiMarker");
   const aiMarkerLabel = $("aiMarkerLabel");
 
@@ -709,7 +763,6 @@ async function handleCaseSubmit(isSkip){
 
     ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk),
 
-    // AI risk of REINTUBATION within 48h
     risk_score_shown: (showProb && c && isFinite(risk)) ? risk.toFixed(6) : "",
     risk_percent_shown: (showProb && c && isFinite(risk)) ? String(Math.round(risk*100)) : "",
     threshold_shown: "",
@@ -719,25 +772,29 @@ async function handleCaseSubmit(isSkip){
     time_seconds
   };
 
-  // Store patient fields (now includes ICU_LOS_hours)
   if (c){
     Object.assign(payload, {
       Age: c.Age, Sex: c.Sex, Race: c.Race,
-      HR_category: c.HR_category,
-      RR: c.RR,
-      Arterial_pH: c.Arterial_pH,
-      PaO2_FiO2: c.PaO2_FiO2,
-      Hypercapnia: c.Hypercapnia,
-      MAP_category: c.MAP_category,
-      RSBI: c.RSBI,
-      qSOFA: c.qSOFA,
+
+      CARDIOVASCULAR_Vasoactive_use_proxy: c.CARDIO_VasoactiveProxy,
+      CARDIOVASCULAR_HR: c.CARDIO_HR,
+      CARDIOVASCULAR_MAP: c.CARDIO_MAP,
+      CARDIOVASCULAR_qSOFA: c.CARDIO_qSOFA,
+
+      VENTILATOR_SETTINGS_RR: c.VENT_RR,
+      VENTILATOR_SETTINGS_FiO2: c.VENT_FiO2,
+
+      ABG_Arterial_pH: c.ABG_pH,
+      ABG_PaO2_FiO2: c.ABG_PF,
+      ABG_PaCO2_Hypercapnia: c.ABG_PaCO2_Hypercapnia,
+      ABG_RSBI: c.ABG_RSBI,
+
       MV_duration_h: c.MV_duration_h,
       ICU_LOS_days: c.ICU_LOS_days,
       ICU_LOS_hours: c.ICU_LOS_hours,
       ICU_time_ge4: c.ICU_time_ge4,
-      LOS_gt_MV: c.LOS_gt_MV,
+      LOS_gt_MV_duration: c.LOS_gt_MV,
 
-      // always PASS (no details)
       CTICU_extubation_procedure: "PASS",
       CTICU_guidelines_url: state.guidelinesURL
     });
