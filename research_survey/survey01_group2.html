@@ -113,13 +113,13 @@
   <div class="card" id="setupCard">
     <h2 style="margin:0 0 6px;">Participant Info</h2>
     <p class="note" style="margin:0 0 8px;">
-      Please enter a study ID (no personal identifiers). You can’t start until Doctor ID is filled.
+      Please enter a study ID (no personal identifiers). You can’t start until Email is filled.
     </p>
 
     <div class="row">
       <div>
-        <label for="doctor_id">Doctor ID (or initials)</label>
-        <input id="doctor_id" placeholder="e.g., D023" required />
+        <label for="doctor_id">Email</label>
+        <input id="doctor_id" placeholder="e.g., doctor2@vt.edu" required />
       </div>
       <div>
         <label for="specialty">Specialty (optional)</label>
@@ -749,7 +749,7 @@ function showMain(){
 $("startBtn").addEventListener("click", () => {
   const did = $("doctor_id").value.trim();
   if (!did){
-    $("setupMsg").innerHTML = '<span class="warn">Doctor ID is required.</span>';
+    $("setupMsg").innerHTML = '<span class="warn">Email is required.</span>';
     return;
   }
 
