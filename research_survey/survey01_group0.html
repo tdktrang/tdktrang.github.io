@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CTICU Extubation Decision Survey — Group 0</title>
+  <title>CTICU Extubation Decision Survey</title>
   <style>
     :root { --border:#e5e7eb; --text:#111827; --muted:#6b7280; --bg:#ffffff; --soft:#f9fafb; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; max-width: 980px; color:var(--text); background:var(--bg); }
@@ -48,7 +48,7 @@
 </head>
 
 <body>
-  <h1>CTICU Extubation Decision Survey — Group 0</h1>
+  <h1>CTICU Extubation Decision Survey</h1>
   <p class="note">
     Thank you for participating in this study.
     This survey is designed to better understand <b>clinical decision-making around extubation in the ICU</b>.
@@ -85,10 +85,6 @@
       <div>
         <label for="years_exp">Years of experience (optional)</label>
         <input id="years_exp" type="number" min="0" max="60" placeholder="e.g., 7" />
-      </div>
-      <div>
-        <label for="group_id">Group / Arm (optional)</label>
-        <input id="group_id" value="Group 0" readonly />
       </div>
     </div>
 
@@ -178,7 +174,7 @@
    =========================== */
 const ACCESS_KEY = "59ec2291-24b9-4a2d-85ef-f51d698ca7fe";
 
-/* Group 0 AI: Phase 0 none; Phase 1–3 binary only */
+/* AI: Phase 0 none; Phase 1–3 binary only */
 const INTERNAL_BINARY_CUTOFF = 0.5;
 
 /* Phase case IDs */
@@ -597,7 +593,7 @@ async function submitRecord(payload){
       body: JSON.stringify({
         access_key: ACCESS_KEY,
         from_name: "CTICU Survey",
-        subject: `CTICU Survey Submission — ${payload.group_id || "Group 0"}`,
+        subject: `CTICU Survey Submission — Group 0}`,
         botcheck: "",
         ...payload
       })
@@ -748,7 +744,7 @@ async function handleCaseSubmit(isSkip){
   const doctor_id = $("doctor_id").value.trim();
   const specialty = $("specialty").value.trim();
   const years_exp = $("years_exp").value.trim();
-  const group_id = $("group_id").value.trim();
+
 
   let human_reintubation_prediction = "";
   let rationale = "";
@@ -762,7 +758,7 @@ async function handleCaseSubmit(isSkip){
 
   const payload = {
     submission_id: makeSubmissionId(),
-    doctor_id, specialty, years_exp, group_id,
+    doctor_id, specialty, years_exp,
     phase: state.phase,
     phase_case_index: state.idx + 1,
     encounter_id: c ? c.encounterId : "",
