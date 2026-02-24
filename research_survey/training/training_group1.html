@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Decision Support Training — Group 1 (Probability)</title>
+  <style>
+    :root {
+      --border:#e5e7eb; --text:#111827; --muted:#6b7280; --bg:#ffffff; --soft:#f9fafb;
+      --blue:#2563eb; --red:#ef4444; --green:#16a34a; --amber:#d97706;
+    }
+    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; margin: 24px; max-width: 980px; color: var(--text); background: var(--bg); }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    h2 { margin: 18px 0 8px; font-size: 20px; }
+    h3 { margin: 14px 0 8px; font-size: 16px; }
+    p, li { line-height: 1.5; }
+    .note { color: var(--muted); }
+    .card { border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin: 14px 0; background: #fff; }
+    .soft { background: var(--soft); }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; font-size:13px; font-weight:800; margin-right:8px; }
+    .pill.blue { border-color: rgba(37,99,235,.35); background: rgba(37,99,235,.08); }
+    .divider { height:1px; background: var(--border); margin: 14px 0; }
+    .callout {
+      border-left:5px solid var(--blue); background:#f0f6ff; padding: 12px 14px; border-radius: 14px; margin: 10px 0;
+    }
+    .warn {
+      border-left:5px solid var(--red); background:#fff1f2; padding: 12px 14px; border-radius: 14px; margin: 10px 0;
+    }
+    .ok {
+      border-left:5px solid var(--green); background:#f0fdf4; padding: 12px 14px; border-radius: 14px; margin: 10px 0;
+    }
+    img { width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--border); background:#fff; }
+    code { background:#f3f4f6; padding: 2px 6px; border-radius: 8px; }
+    table { width:100%; border-collapse: collapse; margin-top: 10px; border:1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    th, td { padding: 10px; border-bottom:1px solid var(--border); vertical-align: top; font-size: 14px; }
+    th { text-align:left; background:#f8fafc; font-weight:800; }
+    tr:last-child td { border-bottom:none; }
+
+    /* Mini risk bar demo */
+    .barWrap { margin-top: 12px; }
+    .barContainer { position: relative; height: 34px; margin-top: 8px; }
+    .track { position:absolute; left:0; right:0; top:14px; height:8px; border-radius: 999px; background:#d1d5db; }
+    .marker { position:absolute; top:9px; width:3px; height:18px; border-radius:2px; background: var(--blue); }
+    .markerLabel {
+      position:absolute; top:-2px; transform: translateX(-50%);
+      font-size: 12px; color: var(--muted); white-space: nowrap;
+      background: rgba(255,255,255,.9); padding: 0 6px; border-radius: 8px; border: 1px solid var(--border);
+    }
+    .small { font-size: 12.5px; color: var(--muted); }
+    .twoCol { display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 860px) { .twoCol { grid-template-columns: 1.2fr .8fr; } }
+  </style>
+</head>
+
+<body>
+  <h1>AI Decision Support Training — Group 1</h1>
+  <p class="note">
+    In <b>Group 1</b>, you will see an <b>AI risk score (probability)</b> that estimates the chance of
+    <b>reintubation within 48 hours</b> <b>if the patient is extubated now</b>. No threshold marker is shown.
+  </p>
+
+  <div class="card soft">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span class="pill blue">Probability output</span>
+      <span class="pill">0–100%</span>
+      <span class="pill">Decision support</span>
+    </div>
+    <div class="divider"></div>
+    <p style="margin:0;">
+      <b>Key idea:</b> The AI provides a <b>continuous risk signal</b> (e.g., 12% vs 62%). You decide how to use it along with clinical judgment.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>1) What the AI uses</h2>
+    <div class="twoCol">
+      <div>
+        <p style="margin-top:0;">
+          The AI reads only the information shown in the survey case table (examples: age, vitals, ventilation duration, labs, qSOFA).
+          It was trained on historical ICU cases labeled by whether <b>48-hour reintubation</b> occurred.
+        </p>
+        <div class="ok">
+          <b>Think of it as:</b> <b>Inputs → ML model → risk probability</b> for the 48-hour outcome.
+        </div>
+        <div class="warn">
+          <b>Important limitation:</b> If something is not in the table (e.g., secretion burden, sedation plan, trajectory, imaging, neuro status),
+          the AI cannot account for it.
+        </div>
+      </div>
+      <div>
+        <img src="image1.png" alt="Patient case inputs flow into ML and output a risk score bar (0–100%)" />
+        <p class="small" style="margin:10px 0 0;">
+          Diagram: patient inputs → ML → risk score (0–100%).
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2) What the probability means</h2>
+
+    <div class="callout">
+      If the AI shows <b>Risk = 20%</b>, it means: among similar patients (based on the displayed inputs, and similar to the training data),
+      about <b>20 out of 100</b> would be expected to require reintubation within 48 hours <b>if extubated now</b>.
+    </div>
+
+    <div class="warn">
+      <b>What it does NOT mean:</b>
+      <ul style="margin:8px 0 0 18px;">
+        <li><b>Not a guarantee.</b> 20% does not mean this patient “will fail.”</li>
+        <li><b>Not causality.</b> The model predicts risk; it does not prove extubation causes reintubation.</li>
+        <li><b>Not complete.</b> Risk is based only on the inputs shown, not the full clinical picture.</li>
+      </ul>
+    </div>
+
+    <h3>Quick interpretation guide</h3>
+    <table>
+      <thead><tr><th>Risk level</th><th>How to use it</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Low</b> (example: 0–15%)</td>
+          <td>AI suggests low concern based on recorded inputs. Still verify stability and readiness.</td>
+        </tr>
+        <tr>
+          <td><b>Intermediate</b> (example: 15–35%)</td>
+          <td>Uncertainty is often higher. Re-check missing clinical factors and consider additional evidence.</td>
+        </tr>
+        <tr>
+          <td><b>High</b> (example: &gt;35%)</td>
+          <td>AI suggests higher concern. Consider whether risks are modifiable or whether more time/support is needed.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">These ranges are examples for intuition; the survey does not provide a threshold for Group 1.</p>
+
+    <h3>Example risk bar (for reading the display)</h3>
+    <div class="barWrap">
+      <div class="note" style="margin:0;"><b>0</b> = low risk &nbsp;•&nbsp; <b>100</b> = high risk</div>
+      <div class="barContainer" aria-label="Example risk bar">
+        <div class="track"></div>
+        <div class="marker" style="left:62%;"></div>
+        <div class="markerLabel" style="left:62%;">AI 62%</div>
+      </div>
+      <div class="small">Interpret the number as a continuous signal (higher = more concern), not as certainty.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3) Recommended workflow (30 seconds)</h2>
+    <ol>
+      <li><b>Review the case table first</b> (vitals, trajectory, ventilation duration, labs, etc.).</li>
+      <li><b>Look at the AI risk</b>: does it match your clinical impression?</li>
+      <li>If <b>mismatch</b>, ask: “What important factors are missing from the inputs?” (secretions, sedation, neuro status, imaging, trend).</li>
+    </ol>
+    <div class="callout">
+      <b>Reminder:</b> This is <b>decision support</b>. Final responsibility remains with the clinician.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4) Mini glossary</h2>
+    <table>
+      <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><b>AI risk / probability</b></td><td>Estimated chance (0–100%) of 48-hour reintubation if extubated now, based on displayed inputs.</td></tr>
+        <tr><td><b>Discrimination</b></td><td>How well the model ranks higher-risk cases above lower-risk cases (e.g., AUROC).</td></tr>
+        <tr><td><b>Calibration</b></td><td>Whether predicted percentages match observed rates in similar patients.</td></tr>
+        <tr><td><b>Dataset shift</b></td><td>Patients/practice differ from training data; performance can change.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card soft">
+    <h2 style="margin-top:0;">Contact</h2>
+    <p class="note" style="margin:0;">Questions about the survey interface or AI output: <b>tdktrang@vt.edu</b></p>
+    <p class="note" style="margin:8px 0 0;">Last updated: 2026-02-24</p>
+  </div>
+</body>
+</html>
