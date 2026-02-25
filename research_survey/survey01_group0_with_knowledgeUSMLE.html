@@ -660,11 +660,10 @@ let state = {
 };
 
 /* ===========================
-   KNOWLEDGE CHECK
+   KNOWLEDGE CHECK (USMLE STYLE)
    =========================== */
-const KNOWLEDGE_PASS_THRESHOLD = 0;
+const KNOWLEDGE_PASS_THRESHOLD = 7;
 
-/* ✅ USMLE-style vignette knowledge check (drop-in replacement) */
 const KNOWLEDGE_QUESTIONS = [
   {
     id: "kc1",
@@ -702,12 +701,7 @@ const KNOWLEDGE_QUESTIONS = [
   {
     id: "kc4",
     stem: "A 70-year-old man is evaluated during an SBT. Respiratory rate is 30/min and tidal volume is 0.25 L. Which of the following is the approximate rapid shallow breathing index (RSBI)?",
-    choices: [
-      "8",
-      "60",
-      "120",
-      "300"
-    ],
+    choices: ["8","60","120","300"],
     correct: 2
   },
   {
@@ -724,12 +718,7 @@ const KNOWLEDGE_QUESTIONS = [
   {
     id: "kc6",
     stem: "A patient has an arterial blood gas showing PaO₂ 80 mmHg while receiving FiO₂ 0.40. What is the approximate PaO₂/FiO₂ (P/F) ratio?",
-    choices: [
-      "80",
-      "120",
-      "200",
-      "320"
-    ],
+    choices: ["80","120","200","320"],
     correct: 2
   },
   {
@@ -746,12 +735,7 @@ const KNOWLEDGE_QUESTIONS = [
   {
     id: "kc8",
     stem: "A mechanically ventilated patient remains hypoxemic. Which ventilator adjustment is most directly related to improving oxygenation?",
-    choices: [
-      "Increase FiO₂",
-      "Change I:E ratio",
-      "Increase inspiratory flow rate",
-      "Adjust trigger sensitivity"
-    ],
+    choices: ["Increase FiO₂","Change I:E ratio","Increase inspiratory flow rate","Adjust trigger sensitivity"],
     correct: 0
   },
   {
@@ -777,6 +761,53 @@ const KNOWLEDGE_QUESTIONS = [
     correct: 1
   }
 ];
+
+function renderKnowledgeCheck(){
+  const wrap = $("knowledgeQuestions");
+  if (!wrap) return;
+
+  wrap.innerHTML = KNOWLEDGE_QUESTIONS.map((q, i) => {
+    const opts = q.choices.map((c, j) => {
+      const name = `kc_${q.id}`;
+      const id = `${name}_${j}`;
+      return `
+        <label class="ynChoice" style="display:flex; gap:10px; align-items:flex-start; margin-top:8px;">
+          <input type="radio" id="${id}" name="${name}" value="${j}" />
+          <span><b>${String.fromCharCode(65+j)}.</b> ${c}</span>
+        </label>
+      `;
+    }).join("");
+
+    return `
+      <div class="questionBox" style="margin-top:12px;">
+        <div style="font-weight:800;">Q${i+1}. ${q.stem}</div>
+        <div class="ynRow" style="flex-direction:column; align-items:stretch; gap:0; margin-top:10px;">
+          ${opts}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  $("knowledgeMsg").textContent = "";
+}
+
+function getKnowledgeAnswers(){
+  const answers = {};
+  for (const q of KNOWLEDGE_QUESTIONS){
+    const sel = document.querySelector(`input[name="kc_${q.id}"]:checked`);
+    answers[q.id] = sel ? Number(sel.value) : null;
+  }
+  return answers;
+}
+
+function scoreKnowledge(answers){
+  let correct = 0;
+  for (const q of KNOWLEDGE_QUESTIONS){
+    if (answers[q.id] === q.correct) correct += 1;
+  }
+  return correct;
+}
+
 /* ===========================
    RENDERING
    =========================== */
@@ -848,13 +879,13 @@ function showOnly(elId){
   });
 }
 function showMain(){
-  // hide setup + knowledge
   $("setupCard").classList.add("hidden");
   $("knowledgeCard").classList.add("hidden");
   $("progressCard").classList.remove("hidden");
   $("caseCard").classList.remove("hidden");
   $("doneCard").classList.add("hidden");
 }
+
 /* ===========================
    START
    =========================== */
@@ -865,7 +896,6 @@ $("startBtn").addEventListener("click", () => {
     return;
   }
 
-  // Initialize randomized case order now (so it's fixed for this participant)
   state.phaseOrder[0] = shuffle(PHASE0_IDS);
   state.phaseOrder[1] = shuffle(PHASE1_IDS);
   state.phaseOrder[2] = shuffle(PHASE2_IDS);
@@ -877,14 +907,12 @@ $("startBtn").addEventListener("click", () => {
 
   $("setupMsg").textContent = "";
 
-  // ✅ If KC already completed for this email on this device, skip KC and go to cases
   if (hasDoneKC(did)){
     showMain();
     renderCurrentCase();
     return;
   }
 
-  // Otherwise show KC
   renderKnowledgeCheck();
   showOnly("knowledgeCard");
 });
@@ -966,7 +994,6 @@ $("knowledgeForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  // ✅ Block repeat attempts on this device
   if (hasDoneKC(doctor_id)){
     $("knowledgeMsg").innerHTML = '<span class="warn">Knowledge check already completed on this device. Proceeding to Phase 0…</span>';
     setTimeout(() => { showMain(); renderCurrentCase(); }, 400);
@@ -1006,7 +1033,6 @@ $("knowledgeForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  // ✅ Mark as done AFTER successful submit
   markDoneKC(doctor_id);
 
   const gateMsg = (score >= KNOWLEDGE_PASS_THRESHOLD)
