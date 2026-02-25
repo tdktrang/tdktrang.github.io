@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CTICU Extubation Decision Survey</title>
+  <style>
+    :root { --border:#e5e7eb; --text:#111827; --muted:#6b7280; --bg:#ffffff; --soft:#f9fafb; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; max-width: 980px; color:var(--text); background:var(--bg); }
+    h1 { margin: 0 0 6px; }
+    .note { color: var(--muted); font-size: 0.95rem; line-height: 1.35; }
+    .card { border:1px solid var(--border); border-radius: 14px; padding: 18px; margin: 14px 0; background: #fff; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display:block; font-weight:650; margin-top: 10px; }
+    input, textarea { width:100%; padding: 10px; margin-top: 6px; border-radius: 12px; border:1px solid #d1d5db; font-size: 14px; }
+    textarea { min-height: 90px; }
+    .hidden { display:none; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background: var(--soft); border:1px solid var(--border); margin-right: 8px; font-size: 13px; }
+    .pill.active { background:#e8f3ff; border-color:#3b82f6; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1px solid #111; background:#111; color:#fff; cursor:pointer; font-weight: 650; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .btn2 { padding: 10px 14px; border-radius: 12px; border: 1px solid #9ca3af; background:#fff; color:#111; cursor:pointer; font-weight: 650; }
+    .success { color:#0a7a2f; font-weight: 800; }
+    .warn { color:#8a2a00; font-weight: 800; }
+    .casebox { border:1px solid var(--border); background: var(--soft); border-radius: 14px; padding: 14px; margin-top: 10px; }
+    .kv { margin: 6px 0; }
+    .kv b { font-weight: 800; }
+    .divider { height:1px; background: var(--border); margin: 12px 0; }
+    .small { font-size: 12.5px; color: var(--muted); }
+    a { color:#0b63ce; }
+    a:visited { color:#0b63ce; }
+
+    table { width:100%; border-collapse: collapse; margin-top: 10px; background:#fff; border:1px solid var(--border); border-radius: 12px; overflow:hidden; }
+    th, td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; }
+    th { text-align:left; background:#f8fafc; font-weight: 800; }
+    tr:last-child td { border-bottom: none; }
+
+    .tag { display:inline-block; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:#fff; font-size:12px; font-weight:800; }
+    .tag.ok { border-color:#16a34a; color:#166534; background:#f0fdf4; }
+    .tag.bad { border-color:#ef4444; color:#7f1d1d; background:#fef2f2; }
+    .tag.na  { border-color:#9ca3af; color:#374151; background:#f9fafb; }
+
+    .ynRow { display:flex; gap: 16px; align-items:center; margin-top: 8px; flex-wrap: wrap; }
+    .ynChoice { display:flex; gap: 8px; align-items:center; padding: 10px 12px; border:1px solid var(--border); border-radius: 12px; background:#fff; cursor:pointer; }
+    .ynChoice input { width:auto; margin:0; padding:0; }
+    .questionBox { padding: 12px; border:1px solid var(--border); border-radius: 14px; background:#fff; margin-top: 12px; }
+  </style>
+</head>
+
+<body>
+  <h1>CTICU Extubation Decision Survey</h1>
+  <p class="note">
+    Thank you for participating in this study.
+    This survey is designed to better understand <b>clinical decision-making around extubation in the ICU</b>.
+    <br/><br/>
+    You will be presented with a series of patient cases and asked to indicate whether, <b>if extubated now</b>, the patient would require <b>reintubation within 48 hours</b>.
+    <br/><br/>
+    The survey typically takes approximately <b>30 minutes</b> to complete.
+    Please respond based on your clinical judgment.
+    <br/><br/>
+    Thank you for your time and contribution to this research.
+    <br/><br/>
+    If you have any questions or problems please contact <a href="mailto:tdktrang@vt.edu">tdktrang@vt.edu</a>.
+  </p>
+
+  <!-- ===================== SETUP ===================== -->
+  <div class="card" id="setupCard">
+    <h2 style="margin:0 0 6px;">Participant Info</h2>
+    <p class="note" style="margin:0 0 8px;">
+      Please enter a study ID (no personal identifiers). You can’t start until Email is filled.
+    </p>
+
+    <div class="row">
+      <div>
+        <label for="doctor_id">Email</label>
+        <input id="doctor_id" placeholder="e.g., doctor2@vt.edu" required />
+      </div>
+      <div>
+        <label for="specialty">Specialty (optional)</label>
+        <input id="specialty" placeholder="Pulm/Critical Care" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="years_exp">Years of experience (optional)</label>
+        <input id="years_exp" type="number" min="0" max="60" placeholder="e.g., 7" />
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="margin-top: 14px; display:flex; gap:10px; align-items:center;">
+      <button class="btn" id="startBtn" type="button">Start Survey</button>
+      <span class="note" id="setupMsg"></span>
+    </div>
+  </div>
+
+  
+  <!-- ===================== KNOWLEDGE CHECK (PRE-PHASE 0) ===================== -->
+  <div class="card hidden" id="knowledgeCard">
+    <h2 style="margin:0 0 6px;">Extubation Knowledge Check</h2>
+    <p class="note" style="margin:0 0 10px;">
+      Before starting the patient cases, please answer the following questions to confirm baseline knowledge.
+      <br/>This is <b>not</b> a graded exam. Your answers help us interpret survey responses.
+    </p>
+
+    <form id="knowledgeForm">
+      <div id="knowledgeQuestions"></div>
+
+      <div style="margin-top: 14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn" id="knowledgeSubmitBtn" type="submit">Submit Knowledge Check</button>
+        <button class="btn2" id="knowledgeBackBtn" type="button">Back</button>
+        <span class="note" id="knowledgeMsg"></span>
+      </div>
+
+      <div class="small" style="margin-top:10px;">
+        Tip: choose the single best answer for each question.
+      </div>
+    </form>
+  </div>
+
+
+  <!-- ===================== PROGRESS ===================== -->
+  <div class="card hidden" id="progressCard">
+    <h2 style="margin:0 0 6px;">Progress</h2>
+    <div style="margin-top:6px;">
+      <span class="pill" id="p0pill">Phase 0</span>
+      <span class="pill" id="p1pill">Phase 1</span>
+      <span class="pill" id="p2pill">Phase 2</span>
+      <span class="pill" id="p3pill">Phase 3</span>
+      <span class="pill" id="casePill">Case —</span>
+    </div>
+    <p id="status" class="note" style="margin:10px 0 0;">—</p>
+  </div>
+
+  <!-- ===================== MAIN CASE UI ===================== -->
+  <div class="card hidden" id="caseCard">
+    <h2 style="margin:0 0 6px;" id="phaseTitle">—</h2>
+    <div id="phaseIntro" class="note" style="margin:0 0 8px;"></div>
+
+    <div class="casebox">
+      <div class="kv"><b id="caseHeader">Case —</b></div>
+
+      <!-- TABLE view -->
+      <div id="caseTableWrap"></div>
+
+      <div class="divider"></div>
+
+      <div class="kv" id="aiBinaryRow">AI Support (binary): <b id="aiSupportBinary">—</b></div>
+    </div>
+
+    <form id="answerForm">
+      <div class="questionBox">
+        <div style="font-weight:800;">
+          If extubated now, will the patient require reintubation within 48 hours?
+        </div>
+
+        <div class="ynRow" role="radiogroup" aria-label="Reintubation within 48 hours yes/no">
+          <label class="ynChoice">
+            <input type="radio" name="human_reintubation_prediction" value="yes" />
+            <b>Yes</b> (will require reintubation within 48 hours)
+          </label>
+          <label class="ynChoice">
+            <input type="radio" name="human_reintubation_prediction" value="no" />
+            <b>No</b> (will NOT require reintubation within 48 hours)
+          </label>
+        </div>
+        <div class="small" style="margin-top:8px;">
+          Your response is <b>Yes/No only</b>.
+        </div>
+      </div>
+
+      <label>Rationale (optional)</label>
+      <textarea name="rationale" id="rationale" placeholder="Brief reasoning…"></textarea>
+
+      <div style="margin-top: 14px; display:flex; gap:10px; align-items:center;">
+        <button class="btn" id="submitBtn" type="submit">Submit & Next</button>
+        <button class="btn2" id="skipBtn" type="button">Skip (records blank) & Next</button>
+        <span class="note" id="msg"></span>
+      </div>
+
+      <div class="small" style="margin-top:10px;">
+        Each case is submitted as a separate record to Web3Forms.
+      </div>
+    </form>
+  </div>
+
+  <!-- ===================== DONE ===================== -->
+  <div class="card hidden" id="doneCard">
+    <h2 style="margin:0 0 6px;">Completed</h2>
+    <p class="note"><span class="success">All phases completed.</span> Thank you! You may close this window.</p>
+    <button class="btn2" id="resetBtn" type="button">Reset (start over)</button>
+  </div>
+
+<script>
+/* ===========================
+   CONFIG
+   =========================== */
+const ACCESS_KEY = "59ec2291-24b9-4a2d-85ef-f51d698ca7fe";
+
+/* AI: Phase 0 none; Phase 1–3 binary only */
+const INTERNAL_BINARY_CUTOFF = 0.5;
+
+/* Phase case IDs */
+const PHASE0_IDS = [28];
+const PHASE1_IDS = [67];
+const PHASE2_IDS = [89];
+const PHASE3_IDS = [94, 158];
+
+/* ===== Guidelines link + always-PASS procedure ===== */
+const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.pdf"; // replace if needed
+
+/* ===========================
+   CASE DATA (NEW doctor-provided grouped fields)
+   - ONLY includes fields you listed (no extra unavailable columns)
+   - pred_score is kept (needed for AI binary label)
+   =========================== */
+const CASES = {
+  28: {
+    encounterId: 28,
+    Age: 64, Sex: "Male", Race: "Chinese",
+
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=87)",
+    CARDIO_MAP: ">65 mmHg (MAP=84)",
+    CARDIO_qSOFA: "1 (RR=24, SBP=145, GCS=15)",
+
+    VENT_RR: ">20 (RR=24)",
+    VENT_FiO2: "0.4",
+
+    ABG_pH: "7.35-7.45 (pH=7.37)",
+    ABG_PF: "≥300 (PaO2=189, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=37 mmHg)",
+    ABG_RSBI: "",
+
+    MV_duration_h: 7.5,
+    ICU_LOS_days: 0.611689815,
+    ICU_LOS_hours: 14.68055556,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 87,
+    RR_raw: 24,
+    pH_raw: 7.37,
+    PaO2_raw: 189.2,
+    FiO2_used: 0.4,
+    PaCO2_raw: 37.3,
+    PF_raw: 473,
+    MAP_raw: 84,
+    SBP_raw: 145,
+    DBP_raw: 72,
+    GCS_raw: 15,
+
+    Norepi_flag: 0,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
+    pred_score: 69
+  },
+
+  67: {
+    encounterId: 67,
+    Age: 56, Sex: "Female", Race: "Malay",
+
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=82)",
+    CARDIO_MAP: ">65 mmHg (MAP=74)",
+    CARDIO_qSOFA: "0 (RR=12, SBP=110, GCS=15)",
+
+    VENT_RR: "≤20 (RR=12)",
+    VENT_FiO2: "0.3",
+
+    ABG_pH: "7.35-7.45 (pH=7.39)",
+    ABG_PF: "<300 (PaO2=42, FiO2=0.30)",
+    ABG_PaCO2_Hypercapnia: "PaCO2 > 45 (PaCO2=52 mmHg)",
+    ABG_RSBI: "",
+
+    MV_duration_h: 36.41666667,
+    ICU_LOS_days: 1.518726852,
+    ICU_LOS_hours: 36.44944444,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 82,
+    RR_raw: 12,
+    pH_raw: 7.39,
+    PaO2_raw: 41.9,
+    FiO2_used: 0.3,
+    PaCO2_raw: 52.1,
+    PF_raw: 139.6666667,
+    MAP_raw: 74,
+    SBP_raw: 110,
+    DBP_raw: 56,
+    GCS_raw: 15,
+
+    Norepi_flag: 0,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 0,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
+    pred_score: 41
+  },
+
+  89: {
+    encounterId: 89,
+    Age: 51, Sex: "Male", Race: "Malay",
+
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=88)",
+    CARDIO_MAP: ">65 mmHg (MAP=77)",
+    CARDIO_qSOFA: "1 (RR=16, SBP=114, GCS=10)",
+
+    VENT_RR: "≤20 (RR=16)",
+    VENT_FiO2: "0.4",
+
+    ABG_pH: "<7.35 (pH=7.32)",
+    ABG_PF: "<300 (PaO2=113, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "PaCO2 > 45 (PaCO2=47 mmHg)",
+    ABG_RSBI: "",
+
+    MV_duration_h: 11.25,
+    ICU_LOS_days: 0.655543981,
+    ICU_LOS_hours: 15.73305556,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 88,
+    RR_raw: 16,
+    pH_raw: 7.32,
+    PaO2_raw: 112.6,
+    FiO2_used: 0.4,
+    PaCO2_raw: 47.1,
+    PF_raw: 281.5,
+    MAP_raw: 77,
+    SBP_raw: 114,
+    DBP_raw: 63,
+    GCS_raw: 10,
+
+    Norepi_flag: 0,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 0,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Failure",
+    Failure01: 1,
+    Success01: 0,
+
+    pred_score: 77
+  },
+
+  94: {
+    encounterId: 94,
+    Age: 66, Sex: "Male", Race: "Chinese",
+
+    CARDIO_VasoactiveProxy: "Yes (n_agents=1)",
+    CARDIO_HR: "60-100 (HR=88)",
+    CARDIO_MAP: ">65 mmHg (MAP=71)",
+    CARDIO_qSOFA: "2 (RR=17, SBP=92, GCS=11)",
+
+    VENT_RR: "≤20 (RR=17)",
+    VENT_FiO2: "0.4",
+
+    ABG_pH: "7.35-7.45 (pH=7.40)",
+    ABG_PF: "≥300 (PaO2=153, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=40 mmHg)",
+    ABG_RSBI: "",
+
+    MV_duration_h: 19,
+    ICU_LOS_days: 0.775405093,
+    ICU_LOS_hours: 18.60972222,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "FAIL",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 88,
+    RR_raw: 17,
+    pH_raw: 7.4,
+    PaO2_raw: 153.1,
+    FiO2_used: 0.4,
+    PaCO2_raw: 40.1,
+    PF_raw: 382.75,
+    MAP_raw: 71,
+    SBP_raw: 92,
+    DBP_raw: 58,
+    GCS_raw: 11,
+
+    Norepi_flag: 1,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
+    pred_score: 52
+  },
+
+  158: {
+    encounterId: 158,
+    Age: 25, Sex: "Female", Race: "Malay",
+
+    CARDIO_VasoactiveProxy: "No (n_agents=0)",
+    CARDIO_HR: "60-100 (HR=96)",
+    CARDIO_MAP: ">65 mmHg (MAP=68)",
+    CARDIO_qSOFA: "2 (RR=20, SBP=100, GCS=11)",
+
+    VENT_RR: "≤20 (RR=20)",
+    VENT_FiO2: "0.4",
+
+    ABG_pH: "7.35-7.45 (pH=7.41)",
+    ABG_PF: "≥300 (PaO2=166, FiO2=0.40)",
+    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=39 mmHg)",
+    ABG_RSBI: "",
+
+    MV_duration_h: 14.5,
+    ICU_LOS_days: 0.744097222,
+    ICU_LOS_hours: 17.85833333,
+    ICU_time_ge4: "PASS",
+    LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 96,
+    RR_raw: 20,
+    pH_raw: 7.41,
+    PaO2_raw: 165.6,
+    FiO2_used: 0.4,
+    PaCO2_raw: 39.3,
+    PF_raw: 414,
+    MAP_raw: 68,
+    SBP_raw: 100,
+    DBP_raw: 53,
+    GCS_raw: 11,
+
+    Norepi_flag: "",
+    Epi_flag: "",
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
+    pred_score: 33
+  }
+};
+
+/* ===========================
+   HELPERS
+   =========================== */
+function $(id){ return document.getElementById(id); }
+function setPill(id, active){ $(id).classList.toggle("active", !!active); }
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function makeSubmissionId(){ return `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
+function safe(v){ return (v === null || v === undefined || String(v).trim() === "") ? "—" : String(v); }
+
+function normalizeRisk(raw){
+  const x = Number(raw);
+  if (!isFinite(x)) return NaN;
+  if (x > 1) return x / 100;
+  return x;
+}
+
+function aiBinaryLabel(risk){
+  if (!isFinite(risk)) return "Not available";
+  return (risk >= INTERNAL_BINARY_CUTOFF)
+    ? "Yes (will require reintubation within 48 hours)"
+    : "No (will NOT require reintubation within 48 hours)";
+}
+
+function tagHtml(kind){
+  if (kind === "PASS") return '<span class="tag ok">PASS</span>';
+  if (kind === "FAIL") return '<span class="tag bad">FAIL</span>';
+  return '<span class="tag na">Not available</span>';
+}
+
+/* ===========================
+   PATIENT TABLE (NEW grouped flow)
+   - Patient demographics
+   - Cardiovascular
+   - Ventilator settings
+   - Arterial blood gas
+   - Durations
+   - Eligibility checks
+   - (NO fields you said not available)
+   =========================== */
+function buildCaseTableHTML(c){
+  if (!c) return '<div class="note">Error: case data not found.</div>';
+
+  const guideUrl = encodeURI(DEFAULT_GUIDELINES_URL);
+
+  return `
+    <table aria-label="Case data table">
+      <tr><th colspan="2">Patient demographics</th></tr>
+      <tr><td>Age</td><td>${safe(c.Age)}</td></tr>
+      <tr><td>Sex</td><td>${safe(c.Sex)}</td></tr>
+      <tr><td>Race</td><td>${safe(c.Race)}</td></tr>
+
+      <tr><th colspan="2">CARDIOVASCULAR</th></tr>
+      <tr><td>Vasoactive use (proxy)</td><td>${safe(c.CARDIO_VasoactiveProxy)}</td></tr>
+      <tr><td>HR</td><td>${safe(c.CARDIO_HR)}</td></tr>
+      <tr><td>MAP</td><td>${safe(c.CARDIO_MAP)}</td></tr>
+      <tr><td>qSOFA</td><td>${safe(c.CARDIO_qSOFA)}</td></tr>
+
+      <tr><th colspan="2">VENTILATOR SETTINGS</th></tr>
+      <tr><td>RR</td><td>${safe(c.VENT_RR)}</td></tr>
+      <tr><td>FiO₂</td><td>${safe(c.VENT_FiO2)}</td></tr>
+
+      <tr><th colspan="2">ARTERIAL BLOOD GAS</th></tr>
+      <tr><td>Arterial pH</td><td>${safe(c.ABG_pH)}</td></tr>
+      <tr><td>PaO₂/FiO₂</td><td>${safe(c.ABG_PF)}</td></tr>
+      <tr><td>PaCO₂ / Hypercapnia</td><td>${safe(c.ABG_PaCO2_Hypercapnia)}</td></tr>
+      <tr><td>RSBI</td><td>${safe(c.ABG_RSBI)}</td></tr>
+
+      <tr><th colspan="2">Durations</th></tr>
+      <tr><td>Mechanical ventilation duration (h)</td><td>${safe(c.MV_duration_h)}</td></tr>
+      <tr><td>ICU LOS (so far) (days)</td><td>${safe(c.ICU_LOS_days)}</td></tr>
+      <tr><td>ICU LOS (so far) (hours)</td><td>${safe(c.ICU_LOS_hours)}</td></tr>
+
+      <tr><th colspan="2">Eligibility checks</th></tr>
+      <tr><td>ICU time ≥ 4 hours</td><td>${tagHtml(c.ICU_time_ge4)}</td></tr>
+      <tr>
+        <td>
+          CTICU guideline extubation procedure
+          <span class="small">(<a href="${guideUrl}" target="_blank" rel="noopener">formal guidelines</a>)</span>
+        </td>
+        <td>${tagHtml("PASS")}</td>
+      </tr>
+    </table>
+  `;
+}
+
+/* ===========================
+   WEB3FORMS SUBMIT
+   =========================== */
+const SUBMIT_TIMEOUT_MS = 12000;
+
+async function submitRecord(payload){
+  const url = "https://api.web3forms.com/submit";
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "Accept":"application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        access_key: ACCESS_KEY,
+        from_name: "CTICU Survey",
+        subject: `CTICU Survey Submission}`,
+        botcheck: "",
+        ...payload
+      })
+    });
+
+    const json = await res.json().catch(() => ({}));
+    return {
+      ok: !!json.success,
+      status: res.status,
+      message: json.message || json.error || "Unknown response",
+      raw: json
+    };
+  } catch (e) {
+    const msg =
+      (e && e.name === "AbortError")
+        ? `Request timed out after ${Math.round(SUBMIT_TIMEOUT_MS/1000)}s`
+        : (e?.message || "Network error / blocked request");
+    return { ok:false, status:0, message: msg, raw:null };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/* ===========================
+   STATE
+   =========================== */
+let state = {
+  started: false,
+  phase: 0,
+  phaseOrder: { 0: [], 1: [], 2: [], 3: [] },
+  idx: 0,
+  caseStartMs: 0
+};
+
+
+/* ===========================
+   KNOWLEDGE CHECK (PRE-PHASE 0)
+   - Simple USMLE-style single-best-answer MCQs
+   - Stores score + answers, submits as ONE record to Web3Forms
+   =========================== */
+const KNOWLEDGE_PASS_THRESHOLD = 7; // adjust if you want stricter/looser gating
+
+const KNOWLEDGE_QUESTIONS = [
+  {
+    id: "kc1",
+    stem: "Which of the following is the best general prerequisite for attempting a spontaneous breathing trial (SBT) before extubation?",
+    choices: [
+      "Deep sedation with no spontaneous respirations",
+      "Hemodynamic stability with minimal or no vasopressor support and adequate oxygenation on low/moderate settings",
+      "PaCO₂ must be < 35 mmHg",
+      "FiO₂ must be 0.21 (room air)"
+    ],
+    correct: 1
+  },
+  {
+    id: "kc2",
+    stem: "A common sign of SBT failure is:",
+    choices: [
+      "Respiratory rate persistently > 35/min during the trial",
+      "Heart rate 70–90/min throughout the trial",
+      "SpO₂ 98% on FiO₂ 0.30",
+      "Patient is awake and following commands"
+    ],
+    correct: 0
+  },
+  {
+    id: "kc3",
+    stem: "Which finding best supports that a patient can protect their airway after extubation?",
+    choices: [
+      "Adequate cough and ability to handle secretions",
+      "High peak inspiratory pressure (PIP)",
+      "Elevated PaCO₂ with respiratory acidosis",
+      "Continuous need for deep sedation"
+    ],
+    correct: 0
+  },
+  {
+    id: "kc4",
+    stem: "The Rapid Shallow Breathing Index (RSBI) is typically defined as:",
+    choices: [
+      "Tidal volume (mL) divided by respiratory rate",
+      "Respiratory rate divided by tidal volume (L)",
+      "PaO₂ divided by FiO₂",
+      "Minute ventilation divided by respiratory rate"
+    ],
+    correct: 1
+  },
+  {
+    id: "kc5",
+    stem: "In general, a lower RSBI is associated with:",
+    choices: [
+      "Higher likelihood of passing SBT/extubation readiness",
+      "Higher likelihood of hypercapnia-related failure",
+      "Need for higher FiO₂",
+      "More severe metabolic acidosis"
+    ],
+    correct: 0
+  },
+  {
+    id: "kc6",
+    stem: "A patient is on FiO₂ 0.40 with PaO₂ 80 mmHg. What is the approximate PaO₂/FiO₂ (P/F) ratio?",
+    choices: [
+      "80",
+      "120",
+      "200",
+      "320"
+    ],
+    correct: 2
+  },
+  {
+    id: "kc7",
+    stem: "Which scenario most increases risk of post-extubation respiratory failure?",
+    choices: [
+      "Strong cough and minimal secretions",
+      "Ongoing high secretion burden with weak cough",
+      "Normal mental status and cooperative patient",
+      "Stable hemodynamics and low ventilatory support"
+    ],
+    correct: 1
+  },
+  {
+    id: "kc8",
+    stem: "Which ventilator setting is most directly related to oxygenation support?",
+    choices: [
+      "FiO₂",
+      "I:E ratio",
+      "Inspiratory flow rate",
+      "Trigger sensitivity"
+    ],
+    correct: 0
+  },
+  {
+    id: "kc9",
+    stem: "Which blood gas pattern suggests ventilatory (not oxygenation) failure risk after extubation?",
+    choices: [
+      "Isolated low PaO₂ with normal PaCO₂",
+      "Elevated PaCO₂ with acidemia (respiratory acidosis)",
+      "Normal pH with normal PaCO₂",
+      "High PaO₂ on high FiO₂"
+    ],
+    correct: 1
+  },
+  {
+    id: "kc10",
+    stem: "After extubation, which intervention is commonly considered for high-risk patients to reduce reintubation risk?",
+    choices: [
+      "Immediate deep sedation",
+      "Prophylactic noninvasive ventilation (NIV) or high-flow nasal cannula (HFNC) when appropriate",
+      "Routine paralysis for 12 hours",
+      "Avoid all supplemental oxygen"
+    ],
+    correct: 1
+  }
+];
+
+function renderKnowledgeCheck(){
+  const wrap = $("knowledgeQuestions");
+  if (!wrap) return;
+
+  wrap.innerHTML = KNOWLEDGE_QUESTIONS.map((q, i) => {
+    const opts = q.choices.map((c, j) => {
+      const name = `kc_${q.id}`;
+      const id = `${name}_${j}`;
+      return `
+        <label class="ynChoice" style="display:flex; gap:10px; align-items:flex-start; margin-top:8px;">
+          <input type="radio" id="${id}" name="${name}" value="${j}" />
+          <span><b>${String.fromCharCode(65+j)}.</b> ${c}</span>
+        </label>
+      `;
+    }).join("");
+
+    return `
+      <div class="questionBox" style="margin-top:12px;">
+        <div style="font-weight:800;">Q${i+1}. ${q.stem}</div>
+        <div class="ynRow" style="flex-direction:column; align-items:stretch; gap:0; margin-top:10px;">
+          ${opts}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  $("knowledgeMsg").textContent = "";
+}
+
+function getKnowledgeAnswers(){
+  const answers = {};
+  for (const q of KNOWLEDGE_QUESTIONS){
+    const sel = document.querySelector(`input[name="kc_${q.id}"]:checked`);
+    answers[q.id] = sel ? Number(sel.value) : null;
+  }
+  return answers;
+}
+
+function scoreKnowledge(answers){
+  let correct = 0;
+  for (const q of KNOWLEDGE_QUESTIONS){
+    if (answers[q.id] === q.correct) correct += 1;
+  }
+  return correct;
+}
+
+/* ===========================
+   RENDERING
+   =========================== */
+function renderProgress(){
+  setPill("p0pill", state.phase === 0);
+  setPill("p1pill", state.phase === 1);
+  setPill("p2pill", state.phase === 2);
+  setPill("p3pill", state.phase === 3);
+  const totalInPhase = state.phaseOrder[state.phase].length;
+  $("casePill").textContent = `Case ${state.idx+1} / ${totalInPhase}`;
+}
+
+function renderPhaseHeader(){
+  if (state.phase === 0){
+    $("phaseTitle").textContent = "Phase 0 — No AI Support";
+    $("phaseIntro").innerHTML = "No AI support is shown in this phase.";
+  } else {
+    $("phaseTitle").textContent = `Phase ${state.phase} — AI Support (Binary only)`;
+    $("phaseIntro").innerHTML = "Binary AI support only.";
+  }
+
+  $("status").textContent =
+    state.phase === 0 ? "Phase 0: No AI support." :
+                        "Phase 1–3: Binary AI support only (if available).";
+}
+
+function clearYesNo(){
+  document.querySelectorAll('input[name="human_reintubation_prediction"]').forEach(r => r.checked = false);
+}
+function getYesNo(){
+  const r = document.querySelector('input[name="human_reintubation_prediction"]:checked');
+  return r ? r.value : "";
+}
+
+function renderCurrentCase(){
+  renderProgress();
+  renderPhaseHeader();
+
+  const id = state.phaseOrder[state.phase][state.idx];
+  const c = CASES[id];
+
+  $("aiBinaryRow").classList.toggle("hidden", state.phase === 0);
+
+  if (!c){
+    $("caseHeader").textContent = "Case —";
+    $("caseTableWrap").innerHTML = '<div class="note">Error: case data not found.</div>';
+    $("aiSupportBinary").textContent = "—";
+    return;
+  }
+
+  $("caseHeader").textContent = `Case ${state.idx+1} (Encounter ${c.encounterId})`;
+  $("caseTableWrap").innerHTML = buildCaseTableHTML(c);
+
+  const risk = normalizeRisk(c.pred_score);
+  $("aiSupportBinary").textContent = (state.phase === 0) ? "—" : aiBinaryLabel(risk);
+
+  clearYesNo();
+  $("rationale").value = "";
+  $("msg").textContent = "";
+  state.caseStartMs = Date.now();
+}
+
+/* ===========================
+   UI SHOW/HIDE
+   =========================== */
+function showOnly(elId){
+  ["setupCard","knowledgeCard","progressCard","caseCard","doneCard"].forEach(id => {
+    $(id).classList.toggle("hidden", id !== elId);
+  });
+}
+function showMain(){
+  $("progressCard").classList.remove("hidden");
+  $("caseCard").classList.remove("hidden");
+  $("doneCard").classList.add("hidden");
+}
+
+/* ===========================
+   START
+   =========================== */
+$("startBtn").addEventListener("click", () => {
+  const did = $("doctor_id").value.trim();
+  if (!did){
+    $("setupMsg").innerHTML = '<span class="warn">Email is required.</span>';
+    return;
+  }
+
+  // Initialize randomized case order now (so it's fixed for this participant)
+  state.phaseOrder[0] = shuffle(PHASE0_IDS);
+  state.phaseOrder[1] = shuffle(PHASE1_IDS);
+  state.phaseOrder[2] = shuffle(PHASE2_IDS);
+  state.phaseOrder[3] = shuffle(PHASE3_IDS);
+
+  state.phase = 0;
+  state.idx = 0;
+  state.started = true;
+
+  $("setupMsg").textContent = "";
+
+  // Go to Knowledge Check BEFORE Phase 0
+  renderKnowledgeCheck();
+  showOnly("knowledgeCard");
+});
+
+/* ===========================
+   SUBMIT CASE RECORD
+   =========================== */
+async function handleCaseSubmit(isSkip){
+  $("submitBtn").disabled = true;
+  $("skipBtn").disabled = true;
+  $("msg").textContent = "Submitting…";
+
+  const id = state.phaseOrder[state.phase][state.idx];
+  const c = CASES[id];
+  const now = Date.now();
+  const time_seconds = Math.max(0, Math.round((now - state.caseStartMs)/1000));
+
+  const doctor_id = $("doctor_id").value.trim();
+  const specialty = $("specialty").value.trim();
+  const years_exp = $("years_exp").value.trim();
+
+
+  let human_reintubation_prediction = "";
+  let rationale = "";
+
+  if (!isSkip){
+    human_reintubation_prediction = getYesNo();
+    rationale = $("rationale").value.trim();
+  }
+
+  const risk = c ? normalizeRisk(c.pred_score) : NaN;
+
+  const payload = {
+    submission_id: makeSubmissionId(),
+    doctor_id, specialty, years_exp,
+    phase: state.phase,
+    phase_case_index: state.idx + 1,
+    encounter_id: c ? c.encounterId : "",
+
+    ai_support_present: (state.phase === 0) ? "no" : "yes",
+    ai_support_type: (state.phase === 0) ? "none" : "binary_only",
+    ai_binary_label_shown: (state.phase === 0 || !c) ? "" : aiBinaryLabel(risk),
+
+    human_reintubation_prediction,
+    rationale,
+    time_seconds
+  };
+
+  // Attach patient fields (NEW grouped flow only)
+  if (c){
+    Object.assign(payload, {
+      Age: c.Age, Sex: c.Sex, Race: c.Race,
+
+      CARDIOVASCULAR_Vasoactive_use_proxy: c.CARDIO_VasoactiveProxy,
+      CARDIOVASCULAR_HR: c.CARDIO_HR,
+      CARDIOVASCULAR_MAP: c.CARDIO_MAP,
+      CARDIOVASCULAR_qSOFA: c.CARDIO_qSOFA,
+
+      VENTILATOR_SETTINGS_RR: c.VENT_RR,
+      VENTILATOR_SETTINGS_FiO2: c.VENT_FiO2,
+
+      ABG_Arterial_pH: c.ABG_pH,
+      ABG_PaO2_FiO2: c.ABG_PF,
+      ABG_PaCO2_Hypercapnia: c.ABG_PaCO2_Hypercapnia,
+      ABG_RSBI: c.ABG_RSBI,
+
+      MV_duration_h: c.MV_duration_h,
+      ICU_LOS_days: c.ICU_LOS_days,
+      ICU_LOS_hours: c.ICU_LOS_hours,
+
+      ICU_time_ge4: c.ICU_time_ge4,
+      LOS_gt_MV_duration: c.LOS_gt_MV,
+
+      CTICU_extubation_procedure: "PASS",
+      CTICU_guidelines_url: DEFAULT_GUIDELINES_URL
+    });
+  }
+
+  const result = await submitRecord(payload);
+
+  if (!result.ok){
+    $("msg").innerHTML =
+      `<span class="warn">Submission failed.</span> ` +
+      `(${result.status || "no status"}) ${result.message}`;
+    $("submitBtn").disabled = false;
+    $("skipBtn").disabled = false;
+    return;
+  }
+
+  $("msg").innerHTML = '<span class="success">Saved.</span>';
+  setTimeout(() => advance(), 250);
+}
+
+function advance(){
+  $("submitBtn").disabled = false;
+  $("skipBtn").disabled = false;
+
+  const total = state.phaseOrder[state.phase].length;
+  if (state.idx < total - 1){
+    state.idx += 1;
+    renderCurrentCase();
+    return;
+  }
+
+  if (state.phase === 0){ state.phase = 1; state.idx = 0; renderCurrentCase(); return; }
+  if (state.phase === 1){ state.phase = 2; state.idx = 0; renderCurrentCase(); return; }
+  if (state.phase === 2){ state.phase = 3; state.idx = 0; renderCurrentCase(); return; }
+
+  $("caseCard").classList.add("hidden");
+  $("doneCard").classList.remove("hidden");
+  $("status").innerHTML = '<span class="success">All phases completed.</span> Thank you!';
+}
+
+
+/* ===========================
+   KNOWLEDGE CHECK EVENTS
+   =========================== */
+$("knowledgeBackBtn").addEventListener("click", () => {
+  // Back to participant info
+  showOnly("setupCard");
+});
+
+$("knowledgeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const doctor_id = $("doctor_id").value.trim();
+  if (!doctor_id){
+    $("knowledgeMsg").innerHTML = '<span class="warn">Email is required.</span>';
+    return;
+  }
+
+  const answers = getKnowledgeAnswers();
+  const unanswered = Object.values(answers).filter(v => v === null).length;
+  if (unanswered > 0){
+    $("knowledgeMsg").innerHTML = `<span class="warn">Please answer all questions (${unanswered} remaining).</span>`;
+    return;
+  }
+
+  $("knowledgeSubmitBtn").disabled = true;
+  $("knowledgeBackBtn").disabled = true;
+  $("knowledgeMsg").textContent = "Submitting…";
+
+  const score = scoreKnowledge(answers);
+  const pct = Math.round((score / KNOWLEDGE_QUESTIONS.length) * 100);
+
+  // Submit as a single record (separate from case records)
+  const payload = {
+    submission_id: makeSubmissionId(),
+    record_type: "knowledge_check",
+    doctor_id,
+    specialty: $("specialty").value.trim(),
+    years_exp: $("years_exp").value.trim(),
+    knowledge_score: score,
+    knowledge_total: KNOWLEDGE_QUESTIONS.length,
+    knowledge_percent: pct,
+    knowledge_pass_threshold: KNOWLEDGE_PASS_THRESHOLD,
+    knowledge_pass: (score >= KNOWLEDGE_PASS_THRESHOLD) ? "PASS" : "FAIL",
+    knowledge_answers_json: JSON.stringify(answers)
+  };
+
+  const result = await submitRecord(payload);
+
+  if (!result.ok){
+    $("knowledgeMsg").innerHTML =
+      `<span class="warn">Submission failed.</span> ` +
+      `(${result.status || "no status"}) ${result.message}`;
+    $("knowledgeSubmitBtn").disabled = false;
+    $("knowledgeBackBtn").disabled = false;
+    return;
+  }
+
+  // Inform participant and proceed
+  const gateMsg = (score >= KNOWLEDGE_PASS_THRESHOLD)
+    ? `<span class="success">Saved.</span> Score: <b>${score}/${KNOWLEDGE_QUESTIONS.length}</b>. Proceeding to Phase 0…`
+    : `<span class="warn">Saved.</span> Score: <b>${score}/${KNOWLEDGE_QUESTIONS.length}</b>. You can still proceed, but consider reviewing extubation readiness concepts.`;
+
+  $("knowledgeMsg").innerHTML = gateMsg;
+
+  // Small delay for readability, then start Phase 0 cases
+  setTimeout(() => {
+    showMain();
+    renderCurrentCase();
+    $("knowledgeSubmitBtn").disabled = false;
+    $("knowledgeBackBtn").disabled = false;
+  }, 500);
+});
+
+
+/* ===========================
+   EVENTS
+   =========================== */
+$("answerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const yn = getYesNo();
+  if (!yn){
+    $("msg").innerHTML = '<span class="warn">Please select Yes or No before submitting.</span>';
+    return;
+  }
+  await handleCaseSubmit(false);
+});
+$("skipBtn").addEventListener("click", async () => {
+  await handleCaseSubmit(true);
+});
+
+/* ===========================
+   RESET
+   =========================== */
+$("resetBtn").addEventListener("click", () => {
+  state.started = false;
+  state.phase = 0;
+  state.idx = 0;
+  state.phaseOrder[0] = [];
+  state.phaseOrder[1] = [];
+  state.phaseOrder[2] = [];
+  state.phaseOrder[3] = [];
+  $("setupMsg").textContent = "";
+  showOnly("setupCard");
+});
+
+/* ===========================
+   INITIAL VIEW
+   =========================== */
+showOnly("setupCard");
+</script>
+</body>
+</html>
