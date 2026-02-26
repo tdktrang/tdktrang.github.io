@@ -216,6 +216,10 @@ const DEFAULT_GUIDELINES_URL = "https://example.com/cticu-extubation-guidelines.
 /* ===========================
    CASE DATA
    =========================== */
+// Use these thresholds in the text (per feedback):
+const MAP_THRESHOLD = 60;      // requirement: MAP ≥ 60 mmHg (or >60 if you prefer)
+const PACO2_THRESHOLD = 45;    // hypercapnia: PaCO2 > 45 mmHg
+
 const CASES = {
   28: {
     encounterId: 28,
@@ -223,7 +227,7 @@ const CASES = {
 
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=87)",
-    CARDIO_MAP: ">65 mmHg (MAP=84)",
+    CARDIO_MAP: "MAP=84 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "1 (RR=24, SBP=145, GCS=15)",
 
     VENT_RR: ">20 (RR=24)",
@@ -231,7 +235,7 @@ const CASES = {
 
     ABG_pH: "7.35-7.45 (pH=7.37)",
     ABG_PF: "≥300 (PaO2=189, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=37 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=37 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
 
     MV_duration_h: 7.5,
@@ -281,7 +285,7 @@ const CASES = {
 
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=82)",
-    CARDIO_MAP: ">65 mmHg (MAP=74)",
+    CARDIO_MAP: "MAP=74 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "0 (RR=12, SBP=110, GCS=15)",
 
     VENT_RR: "≤20 (RR=12)",
@@ -289,7 +293,7 @@ const CASES = {
 
     ABG_pH: "7.35-7.45 (pH=7.39)",
     ABG_PF: "<300 (PaO2=42, FiO2=0.30)",
-    ABG_PaCO2_Hypercapnia: "PaCO2 > 45 (PaCO2=52 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=52 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
 
     MV_duration_h: 36.41666667,
@@ -339,7 +343,7 @@ const CASES = {
 
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=88)",
-    CARDIO_MAP: ">65 mmHg (MAP=77)",
+    CARDIO_MAP: "MAP=77 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "1 (RR=16, SBP=114, GCS=10)",
 
     VENT_RR: "≤20 (RR=16)",
@@ -347,7 +351,7 @@ const CASES = {
 
     ABG_pH: "<7.35 (pH=7.32)",
     ABG_PF: "<300 (PaO2=113, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "PaCO2 > 45 (PaCO2=47 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=47 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
 
     MV_duration_h: 11.25,
@@ -397,7 +401,7 @@ const CASES = {
 
     CARDIO_VasoactiveProxy: "Yes (n_agents=1)",
     CARDIO_HR: "60-100 (HR=88)",
-    CARDIO_MAP: ">65 mmHg (MAP=71)",
+    CARDIO_MAP: "MAP=71 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "2 (RR=17, SBP=92, GCS=11)",
 
     VENT_RR: "≤20 (RR=17)",
@@ -405,7 +409,7 @@ const CASES = {
 
     ABG_pH: "7.35-7.45 (pH=7.40)",
     ABG_PF: "≥300 (PaO2=153, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=40 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=40 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
 
     MV_duration_h: 19,
@@ -455,7 +459,7 @@ const CASES = {
 
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=96)",
-    CARDIO_MAP: ">65 mmHg (MAP=68)",
+    CARDIO_MAP: "MAP=68 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "2 (RR=20, SBP=100, GCS=11)",
 
     VENT_RR: "≤20 (RR=20)",
@@ -463,7 +467,7 @@ const CASES = {
 
     ABG_pH: "7.35-7.45 (pH=7.41)",
     ABG_PF: "≥300 (PaO2=166, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=39 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=39 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
 
     MV_duration_h: 14.5,
