@@ -294,105 +294,298 @@ const PHASE3_IDS = [94, 158];
 /* ===========================
    CASES (doctor-provided columns only)
    =========================== */
+// Use these thresholds in the text (per feedback):
+const MAP_THRESHOLD = 60;      // requirement: MAP ≥ 60 mmHg (or >60 if you prefer)
+const PACO2_THRESHOLD = 45;    // hypercapnia: PaCO2 > 45 mmHg
+
 const CASES = {
   28: {
     encounterId: 28,
     Age: 64, Sex: "Male", Race: "Chinese",
+
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=87)",
-    CARDIO_MAP: ">65 mmHg (MAP=84)",
+    CARDIO_MAP: "MAP=84 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "1 (RR=24, SBP=145, GCS=15)",
+
     VENT_RR: ">20 (RR=24)",
     VENT_FiO2: "0.4",
+
     ABG_pH: "7.35-7.45 (pH=7.37)",
     ABG_PF: "≥300 (PaO2=189, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=37 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=37 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
+
     MV_duration_h: 7.5,
     ICU_LOS_days: 0.611689815,
     ICU_LOS_hours: 14.68055556,
     ICU_time_ge4: "PASS",
     LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 87,
+    RR_raw: 24,
+    pH_raw: 7.37,
+    PaO2_raw: 189.2,
+    FiO2_used: 0.4,
+    PaCO2_raw: 37.3,
+    PF_raw: 473,
+    MAP_raw: 84,
+    SBP_raw: 145,
+    DBP_raw: 72,
+    GCS_raw: 15,
+
+    Norepi_flag: 0,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
     pred_score: 69
   },
+
   67: {
     encounterId: 67,
     Age: 56, Sex: "Female", Race: "Malay",
+
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=82)",
-    CARDIO_MAP: ">65 mmHg (MAP=74)",
+    CARDIO_MAP: "MAP=74 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "0 (RR=12, SBP=110, GCS=15)",
+
     VENT_RR: "≤20 (RR=12)",
     VENT_FiO2: "0.3",
+
     ABG_pH: "7.35-7.45 (pH=7.39)",
     ABG_PF: "<300 (PaO2=42, FiO2=0.30)",
-    ABG_PaCO2_Hypercapnia: ">45 mmHg (PaCO2=52 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=52 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
+
     MV_duration_h: 36.41666667,
     ICU_LOS_days: 1.518726852,
     ICU_LOS_hours: 36.44944444,
     ICU_time_ge4: "PASS",
     LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 82,
+    RR_raw: 12,
+    pH_raw: 7.39,
+    PaO2_raw: 41.9,
+    FiO2_used: 0.3,
+    PaCO2_raw: 52.1,
+    PF_raw: 139.6666667,
+    MAP_raw: 74,
+    SBP_raw: 110,
+    DBP_raw: 56,
+    GCS_raw: 15,
+
+    Norepi_flag: 0,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 0,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
     pred_score: 41
   },
+
   89: {
     encounterId: 89,
     Age: 51, Sex: "Male", Race: "Malay",
+
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=88)",
-    CARDIO_MAP: ">65 mmHg (MAP=77)",
+    CARDIO_MAP: "MAP=77 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "1 (RR=16, SBP=114, GCS=10)",
+
     VENT_RR: "≤20 (RR=16)",
     VENT_FiO2: "0.4",
+
     ABG_pH: "<7.35 (pH=7.32)",
     ABG_PF: "<300 (PaO2=113, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: ">45 mmHg (PaCO2=47 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=47 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
+
     MV_duration_h: 11.25,
     ICU_LOS_days: 0.655543981,
     ICU_LOS_hours: 15.73305556,
     ICU_time_ge4: "PASS",
     LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 88,
+    RR_raw: 16,
+    pH_raw: 7.32,
+    PaO2_raw: 112.6,
+    FiO2_used: 0.4,
+    PaCO2_raw: 47.1,
+    PF_raw: 281.5,
+    MAP_raw: 77,
+    SBP_raw: 114,
+    DBP_raw: 63,
+    GCS_raw: 10,
+
+    Norepi_flag: 0,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 0,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Failure",
+    Failure01: 1,
+    Success01: 0,
+
     pred_score: 77
   },
+
   94: {
     encounterId: 94,
     Age: 66, Sex: "Male", Race: "Chinese",
+
     CARDIO_VasoactiveProxy: "Yes (n_agents=1)",
     CARDIO_HR: "60-100 (HR=88)",
-    CARDIO_MAP: ">65 mmHg (MAP=71)",
+    CARDIO_MAP: "MAP=71 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "2 (RR=17, SBP=92, GCS=11)",
+
     VENT_RR: "≤20 (RR=17)",
     VENT_FiO2: "0.4",
+
     ABG_pH: "7.35-7.45 (pH=7.40)",
     ABG_PF: "≥300 (PaO2=153, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=40 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=40 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
+
     MV_duration_h: 19,
     ICU_LOS_days: 0.775405093,
     ICU_LOS_hours: 18.60972222,
     ICU_time_ge4: "PASS",
     LOS_gt_MV: "FAIL",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 88,
+    RR_raw: 17,
+    pH_raw: 7.4,
+    PaO2_raw: 153.1,
+    FiO2_used: 0.4,
+    PaCO2_raw: 40.1,
+    PF_raw: 382.75,
+    MAP_raw: 71,
+    SBP_raw: 92,
+    DBP_raw: 58,
+    GCS_raw: 11,
+
+    Norepi_flag: 1,
+    Epi_flag: 0,
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
     pred_score: 52
   },
+
   158: {
     encounterId: 158,
     Age: 25, Sex: "Female", Race: "Malay",
+
     CARDIO_VasoactiveProxy: "No (n_agents=0)",
     CARDIO_HR: "60-100 (HR=96)",
-    CARDIO_MAP: ">65 mmHg (MAP=68)",
+    CARDIO_MAP: "MAP=68 mmHg (requirement threshold is MAP ≥ 60 mmHg)",
     CARDIO_qSOFA: "2 (RR=20, SBP=100, GCS=11)",
+
     VENT_RR: "≤20 (RR=20)",
     VENT_FiO2: "0.4",
+
     ABG_pH: "7.35-7.45 (pH=7.41)",
     ABG_PF: "≥300 (PaO2=166, FiO2=0.40)",
-    ABG_PaCO2_Hypercapnia: "<45 mmHg (PaCO2=39 mmHg)",
+    ABG_PaCO2_Hypercapnia: "PaCO2=39 mmHg (hypercapnia if PaCO2 > 45 mmHg)",
     ABG_RSBI: "",
+
     MV_duration_h: 14.5,
     ICU_LOS_days: 0.744097222,
     ICU_LOS_hours: 17.85833333,
     ICU_time_ge4: "PASS",
     LOS_gt_MV: "PASS",
+
+    ChestDrain_raw: "",
+    ChestDrain_lt100: "",
+    RASS_raw: "",
+    RASS_in_range: "",
+
+    HR_raw: 96,
+    RR_raw: 20,
+    pH_raw: 7.41,
+    PaO2_raw: 165.6,
+    FiO2_used: 0.4,
+    PaCO2_raw: 39.3,
+    PF_raw: 414,
+    MAP_raw: 68,
+    SBP_raw: 100,
+    DBP_raw: 53,
+    GCS_raw: 11,
+
+    Norepi_flag: "",
+    Epi_flag: "",
+    Dopamine_flag: "",
+    Vasopressin_flag: "",
+
+    FiO2_le_0_4: 1,
+    pH_in_7_35_7_45: 1,
+    PaO2_gt_60: 1,
+    ICU_to_extub_ge4h: 1,
+    LOS_gt_MV_01: 1,
+
+    Outcome: "Success",
+    Failure01: 0,
+    Success01: 1,
+
     pred_score: 33
   }
 };
